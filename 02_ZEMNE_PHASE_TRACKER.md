@@ -15,7 +15,7 @@
 | P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
 | P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
 | P3 | Codex | Atlas + Render provisioning | COMPLETE — free preview live; Atlas scoped access and Render runtime TLS ping verified |
-| P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
+| P4 | Claude | Real persistence, organizer authorization and moderation APIs | COMPLETE locally — PR #4 awaiting review; live Atlas lifecycle verified in P6 |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
 | P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
 | P7 | Antigravity + owners | Independent browser E2E, UX, bugs, fixes | NOT STARTED |
@@ -129,16 +129,47 @@
 - **Final verification — P3 COMPLETE:** owner corrected URI securely. Direct Chrome Render logs verify deploy `dep-dbgb6iifngtc7397jki0`, source `44a20f2d442d15fad3030547cb5c3362e4680420`, started October 27 at 10:20:58 AM EDT, succeeded/live in 1m27s. Runtime at 10:22:11 AM EDT emitted `status: ok`, `expected_role_only: true`, scope Render runtime network. Probe enforces TLS/certificate/hostname validation and database zemne; ping and expected effective role passed with no writes. Screenshot `docs/evidence/p3/render-database-probe-ok.png`. This supersedes historical missing/invalid URI gates above.
 - **Exact final handoff to Claude:** MONGODB_URI and SESSION_SECRET securely available on Render; Gemma base URL/model/key names present but blank for P5. Use injected environment with `node scripts/infra/probe-mongodb.mjs`; local secrets and any additional narrow developer IP access require secure owner setup. Current app user only readWrite@zemne, scoped to zemne-mvp; current network allows actual Render outbound CIDRs only. No raw secrets recorded or final URI retrieved. No API/models/auth/AI implementation changed. P3 complete; stop before P4/P5/P6. Final demo, real lifecycle/persistence and AI acceptance remain later gates.
 ## P4 — Core backend and moderation [CLAUDE]
-- [ ] Implement `memorials`, `guestbook_entries`, `tributes`, `story_drafts` collections and indexes.
-- [ ] Implement memorial creation with unique slug and high-entropy organizer secret; store hash only.
-- [ ] Implement organizer secret exchange, secure HttpOnly cookie, scoped authorization, CSRF/origin validation and TTL.
-- [ ] Implement guest read, pending guestbook submission and pending tribute submission with validation/rate limits.
-- [ ] Implement organizer approve/reject, public-safe serializers, edit/unpublish endpoints.
-- [ ] No pending content or admin secret leaks through guest endpoints.
-- [ ] Tests: invalid secret, unrelated organizer, rate limits, pending visibility, duplicate slug, XSS payload, storage/restart behavior.
+- [x] Implement `memorials`, `guestbook_entries`, `tributes`, `story_drafts` collections and indexes. (`src/lib/db/schema.ts`: `$jsonSchema` validators, unique slug/token-hash, partial-unique published story, rate-limit TTL)
+- [x] Implement memorial creation with unique slug and high-entropy organizer secret; store hash only. (256-bit `zmn_ot_` token, SHA-256 at rest; slug retry on duplicate key)
+- [x] Implement organizer secret exchange, secure HttpOnly cookie, scoped authorization, CSRF/origin validation and TTL. (`__Host-zemne_org`, HMAC-signed, 12 h, revoked by token version; Origin + Sec-Fetch-Site + JSON content-type)
+- [x] Implement guest read, pending guestbook submission and pending tribute submission with validation/rate limits.
+- [x] Implement organizer approve/reject, public-safe serializers, edit/unpublish endpoints. (also rotate-token; transactional auto-unpublish and supersede)
+- [x] No pending content or admin secret leaks through guest endpoints. (strict response schemas + integration tests + mutation check)
+- [x] Tests: invalid secret, unrelated organizer, rate limits, pending visibility, duplicate slug, XSS payload, storage/restart behavior. (restart = fresh DB connection and fresh server state against the same MongoDB; real Render redeploy persistence is a P6 gate)
 **Gate:** isolated backend tests pass; all core operations backed by MongoDB.
-**Evidence:** PR ___ | Tests count/results ___ | Storage smoke ___
+**Evidence:** PR https://github.com/9jaDevo/zemne/pull/4 (branch `claude/p4-backend`, commits `a788632`, `e3286f4`) | Tests: 10 files / 163 passed (`npm test`, 2026-10-27, Windows, Node 24.11.1; MongoDB integration via `mongodb-memory-server` single-node replica set); typecheck, lint (0 warnings), `npm run build` passed | Storage smoke: `next start` (NODE_ENV=production) against a local MongoDB replica set ran create → pending tribute (public count 0) → token exchange → approve → public count 1 (XSS text returned verbatim as JSON) → cross-origin 403 → no-cookie 401 → weave 503 → PUT 405; server log contained 0 occurrences of the token. **Not run against Atlas**: its allowlist admits Render CIDRs only.
 **Handoff to Codex:** API docs and changed fields, endpoint readiness.
+
+### P4 handoff (Claude → Codex, 2026-10-27)
+- **Phase / agent:** P4 / Claude. Branch `claude/p4-backend` is stacked on `codex/p3-infrastructure` (PR #3, itself on P2 PR #2). PR #4 targets `codex/p3-infrastructure`; GitHub retargets it to `main` when #3 merges.
+- **Implemented:**
+  - All 14 contract routes as Next.js route handlers (`src/app/api/**`), with logic in `src/server/**` and data in `src/lib/db/**`.
+  - Weave runs auth, scope, rate-limit and `NO_APPROVED_TRIBUTES` checks, then returns `503 AI_UNAVAILABLE` until P5. Nothing is stored.
+- **Contract 1.1.0 (additive):**
+  - New error code `FORBIDDEN` (403) when a valid session is used on another memorial's memorial-addressed route. Items of other memorials stay 404.
+  - Organizer lists are capped at 500 per kind; counts stay exact.
+  - Unsupported methods get Next's empty-body 405.
+  - New §3.5 safe-rendering rules and §10 real captured responses.
+  - The P1 mock client now returns `FORBIDDEN` for the cross-memorial case too.
+- **Real commands/tests executed and results:** `npm test` 163/163, `npm run typecheck`, `npm run lint`, `npm run build`, plus the production-server HTTP smoke described in Evidence.
+- **Dependencies:**
+  - `mongodb@^7.7.0` (runtime) and `mongodb-memory-server@^11.3.0` (dev). The dev package downloads a MongoDB binary on the first test run, including in CI.
+  - The lockfile was regenerated cleanly and keeps the cross-platform `@emnapi` entries from P0's fix.
+  - `vitest.config.ts` gained the `@/` alias.
+- **Incomplete items/blockers:**
+  1. Nothing has run against Atlas yet. Local access needs an owner-approved narrow IP; otherwise the first real run is the Render deploy. On first connection the app creates collections, validators and indexes; `readWrite@zemne` is sufficient.
+  2. The client-IP source (`CF-Connecting-IP`, else the right-most `X-Forwarded-For`) must be confirmed on the deployed Render service. Check that two different networks get separate rate-limit buckets.
+  3. Weave generation is P5.
+- **Files/API contracts changed:**
+  - `docs/API_CONTRACT.md` (1.1.0)
+  - `src/shared/api/errors.ts` (`FORBIDDEN`)
+  - `src/shared/fixtures/mock-client.ts`
+  - new `src/app/api/**`, `src/server/**`, `src/lib/db/**`
+  - new tests `tests/backend/{server-security,api-integration,route-wiring}.test.ts` and `tests/backend/helpers/`
+  - `package.json`/lock, `vitest.config.ts`
+- **Recommended next action:**
+  - **Codex (P6):** deploy this branch to Render with the existing `MONGODB_URI`/`SESSION_SECRET`. The `.infra-tools` driver install is no longer needed, since `mongodb` is now an app dependency the probe imports first. Point the health check at `/api/health`. Then wire `createHttpClient()` and the `/m/[slug]` and `/manage/[id]` shells, following contract §2.2, §3.5 and §10.
+  - **Claude (P5):** Gemma weave.
 
 ## P5 — Real Gemma Memory Weaver [CLAUDE]
 - [ ] Configure and verify real inference endpoint for an open-weight Gemma model; document exact model/version/provider/license.
