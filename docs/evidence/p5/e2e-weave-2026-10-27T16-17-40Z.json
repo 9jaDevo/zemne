@@ -1,0 +1,109 @@
+{
+  "note": "End-to-end weave through the real HTTP API (production next start, local MongoDB replica set, real Gemma endpoint). Synthetic data. Tokens/cookies omitted.",
+  "base_url": "http://127.0.0.1 (local)",
+  "steps": [
+    {
+      "step": "create",
+      "at": "2026-10-27T16:17:40.377Z",
+      "status": 201,
+      "slug": "elowen-marsh-v5ijih"
+    },
+    {
+      "step": "tribute_1",
+      "at": "2026-10-27T16:17:40.456Z",
+      "status": 202,
+      "receipt_status": "pending"
+    },
+    {
+      "step": "tribute_2",
+      "at": "2026-10-27T16:17:40.517Z",
+      "status": 202,
+      "receipt_status": "pending"
+    },
+    {
+      "step": "tribute_3",
+      "at": "2026-10-27T16:17:40.580Z",
+      "status": 202,
+      "receipt_status": "pending"
+    },
+    {
+      "step": "public_before_approval",
+      "at": "2026-10-27T16:17:40.618Z",
+      "tributes_visible": 0
+    },
+    {
+      "step": "approved",
+      "at": "2026-10-27T16:17:40.877Z",
+      "count": 3
+    },
+    {
+      "step": "weave_start",
+      "at": "2026-10-27T16:17:41.040Z",
+      "status": 202,
+      "job_status": "running",
+      "error": null,
+      "response_ms": 163
+    },
+    {
+      "step": "weave_duplicate_start",
+      "at": "2026-10-27T16:17:41.064Z",
+      "status": 409,
+      "error": "WEAVE_IN_PROGRESS"
+    },
+    {
+      "step": "weave_done",
+      "at": "2026-10-27T16:18:45.568Z",
+      "elapsed_ms": 64691,
+      "polls": 16,
+      "job_status": "succeeded",
+      "error": null,
+      "model_id": "gemma-4-31b-it",
+      "provider": "Google AI Studio (Gemini API)",
+      "story_status": "draft",
+      "paragraphs": [
+        {
+          "text": "Elowen Marsh was a retired chemistry teacher who showed great patience with her students. She stayed after class every Thursday to help those who were struggling, telling them that \"a mistake was just an experiment that wasn't finished yet.\" Her support inspired one student to become a pharmacist.",
+          "source_tribute_ids": [
+            "6ae0cea41441b515632e4ca6"
+          ]
+        },
+        {
+          "text": "As a gardener, Elowen shared the bounty of her garden with her neighbors. Every August, she left bags of tomatoes on doorsteps with notes on which were best for soup. She also welcomed a neighbor's young son to help water the beans in his own row.",
+          "source_tribute_ids": [
+            "6ae0cea41441b515632e4ca7"
+          ]
+        },
+        {
+          "text": "Elowen was a dedicated member of her community choir. She often arrived first to hum while setting out chairs. When a fellow singer lost their nerve before a solo, she squeezed their hand and told them to \"sing to one person I loved.\"",
+          "source_tribute_ids": [
+            "6ae0cea41441b515632e4ca8"
+          ]
+        }
+      ],
+      "flags": [],
+      "input_tribute_ids_count": 3
+    },
+    {
+      "step": "public_while_draft",
+      "at": "2026-10-27T16:18:45.603Z",
+      "story_visible": false,
+      "cites_only_approved": true
+    },
+    {
+      "step": "publish",
+      "at": "2026-10-27T16:18:45.681Z",
+      "status": 200,
+      "story_status": "published"
+    },
+    {
+      "step": "public_after_publish",
+      "at": "2026-10-27T16:18:45.712Z",
+      "story_visible": true,
+      "ai_disclosure": {
+        "model_id": "gemma-4-31b-it",
+        "provider_label": "Google AI Studio (Gemini API)"
+      },
+      "all_citations_resolve_to_visible_tributes": true
+    }
+  ]
+}

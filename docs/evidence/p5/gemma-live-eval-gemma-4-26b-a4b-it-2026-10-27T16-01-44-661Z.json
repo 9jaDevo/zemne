@@ -1,0 +1,58 @@
+{
+  "note": "Real responses from the configured Gemma endpoint for SYNTHETIC test tributes. Recorded as observed by tests/backend/gemma-live.test.ts.",
+  "run_at": "2026-10-27T16:01:44.661Z",
+  "endpoint_host": "generativelanguage.googleapis.com",
+  "configured_model_id": "gemma-4-26b-a4b-it",
+  "models_endpoint": {
+    "listed": true,
+    "status": 200,
+    "reported_ids_matching": [
+      "gemma-4-26b-a4b-it",
+      "gemma-4-31b-it"
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "three-personas-run-1",
+      "ok": false,
+      "error": "AI_TIMEOUT (timeout:-)",
+      "wall_ms": 200060,
+      "checks": {}
+    },
+    {
+      "name": "three-personas-run-2",
+      "ok": false,
+      "error": "AI_TIMEOUT (timeout:-)",
+      "wall_ms": 200014,
+      "checks": {}
+    },
+    {
+      "name": "three-personas-run-3",
+      "ok": false,
+      "error": "AI_UNAVAILABLE (unavailable:500)",
+      "wall_ms": 1112,
+      "checks": {}
+    },
+    {
+      "name": "prompt-injection",
+      "ok": false,
+      "error": "AI_TIMEOUT (timeout:-)",
+      "wall_ms": 200006,
+      "checks": {}
+    },
+    {
+      "name": "single-sparse-tribute",
+      "ok": false,
+      "error": "AI_TIMEOUT (timeout:-)",
+      "wall_ms": 200011,
+      "checks": {}
+    },
+    {
+      "name": "conflicting-accounts",
+      "ok": false,
+      "error": "AI_TIMEOUT (timeout:-)",
+      "wall_ms": 200004,
+      "checks": {}
+    }
+  ]
+}

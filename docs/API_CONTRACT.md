@@ -1,11 +1,13 @@
 # ZEMNE — API Contract
 
-**Contract version:** `1.1.0` (P4; additive over 1.0.0) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
+**Contract version:** `1.2.0` (P5) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
 **Authority:** `01_ZEMNE_MASTER_BLUEPRINT.md` §5–§8. This document turns that brief into exact routes, fields and rules.
 
 **Source of truth for types:** `src/shared/api/` (Zod schemas + TypeScript types). This document and those schemas must agree. `tests/backend/docs-examples.test.ts` checks every JSON example tagged `<!-- schema: X -->` below against schema `X`.
 
-> **Status (P4):** every route in §5 is implemented in `src/app/api` and backed by MongoDB, except Memory Weaver generation. Weave runs its auth and precondition checks, then returns `503 AI_UNAVAILABLE` until P5 connects a real Gemma provider. §10 lists endpoint readiness and responses captured from the real handlers.
+> **Status (P5):** every route in §5 is implemented in `src/app/api` and backed by MongoDB. Memory Weaver calls a real Gemma model, measured in §6.3. §10 lists endpoint readiness and responses captured from the real handlers.
+>
+> **1.2.0 changes:** weave is now a **background job**. `POST …/weave` returns `202` with a job instead of `201` with a story, and the new `GET …/weave` reports the job (§5.13). `ZemneApiClient.weaveStory()` keeps its signature by polling, so existing UI code is unaffected. New client method `getWeaveStatus()`.
 >
 > **1.1.0 changes:** new error code `FORBIDDEN` (403) for a valid session used on another memorial's memorial-addressed routes (§2.4). The organizer view caps each contribution list at 500. Unsupported HTTP methods get the framework's empty-body `405` (§7). Nothing was renamed or removed.
 
@@ -232,7 +234,8 @@ The API escapes nothing and returns user text exactly as stored. It is plain tex
 | 10 | `POST /api/organizer/memorials/:id/rotate-token` | cookie | 200 + new cookie |
 | 11 | `PATCH /api/organizer/guestbook/:id` | cookie | 200 |
 | 12 | `PATCH /api/organizer/tributes/:id` | cookie | 200 |
-| 13 | `POST /api/organizer/memorials/:id/weave` | cookie | 201 |
+| 13 | `POST /api/organizer/memorials/:id/weave` | cookie | 202 (job started) |
+| 13b | `GET /api/organizer/memorials/:id/weave` | cookie | 200 (job status) |
 | 14 | `PATCH /api/organizer/stories/:id` | cookie | 200 |
 
 Path builders are in `API_ROUTES` (`src/shared/api/routes.ts`). Client methods are in `ZemneApiClient` (`src/shared/api/client.ts`). Every route can also return `400 INVALID_JSON`, `400 VALIDATION_FAILED`, `405`, `413`, `415`, `403 ORIGIN_REJECTED` (writes), `429` and `500`. Only additional errors are listed below.
@@ -449,21 +452,71 @@ Request body: `{}`. The response `200` (`RotateTokenResponse`) contains `manage_
 
 Additional errors: `401`, `404` (unknown id, or one belonging to another memorial). Requesting `status: "pending"` is a `400 VALIDATION_FAILED`.
 
-### 5.13 `POST /api/organizer/memorials/:id/weave` — Gemma Memory Weaver
+### 5.13 `POST` and `GET /api/organizer/memorials/:id/weave` — Gemma Memory Weaver (background job)
 
-Request body: `{}` (`WeaveRequest`; no options). The server collects **every currently approved tribute** of this memorial. Client-supplied tribute ids are not accepted. The server runs the model and the validator (§6) and stores a new `draft`.
+Real Gemma 4 latency on the configured provider is about **1–3 minutes** (§6.3), so weave runs as a **background job** rather than inside one HTTP request. This changed in 1.2.0.
 
-- Response `201` (`WeaveResponse`): `{ "story": StoryView }` with `status: "draft"`, `version: 1`.
-- It runs synchronously with a server timeout of about 60 s. The UI must show a long-running state ("Weaving approved tributes…") and must not double-submit.
-- Additional errors:
-  - `409 NO_APPROVED_TRIBUTES`
-  - `409 WEAVE_IN_PROGRESS`
-  - `502 AI_INVALID_OUTPUT`: the model output was malformed or no paragraph cited a provided tribute, even after one internal retry.
-  - `503 AI_UNAVAILABLE`
-  - `504 AI_TIMEOUT`
-  - `403 FORBIDDEN` for a session that belongs to another memorial.
-  - On every AI error, **nothing is stored and no fallback or fake text is produced**. `retryable: true`.
-- **P4 behaviour:** the route authenticates, checks scope, applies the rate limit, and returns `409 NO_APPROVED_TRIBUTES` when nothing is approved. It then returns `503 AI_UNAVAILABLE` until P5 lands. The UI can already wire its error and retry state against it.
+**`POST` — start a weave.** Request body: `{}` (`WeaveRequest`; no options).
+- The server collects **every currently approved tribute** of this memorial, oldest first, up to 40 tributes or 40,000 characters. Client-supplied tribute ids are not accepted.
+- It starts a job and returns **`202`** (`WeaveStartResponse`) immediately.
+- The job runs the model and the validator (§6) and stores a new **`draft`**. It never publishes.
+
+<!-- schema: WeaveStartResponse -->
+```json
+{
+  "job": {
+    "id": "65d0000000000000000000e1",
+    "status": "running",
+    "started_at": "2026-10-27T12:00:00.000Z",
+    "finished_at": null,
+    "story_id": null,
+    "error": null
+  }
+}
+```
+
+Synchronous errors from `POST`, where no job is started:
+- `401 UNAUTHENTICATED`, `403 FORBIDDEN` (session for another memorial), `403 ORIGIN_REJECTED`, `429 RATE_LIMITED` (6 per hour per memorial).
+- `409 NO_APPROVED_TRIBUTES`.
+- `409 WEAVE_IN_PROGRESS`: a job for this memorial is still running. Only one runs at a time.
+- `503 AI_UNAVAILABLE`: no Gemma endpoint is configured on the server.
+
+**`GET` — job status.** Returns `200` (`WeaveStatusResponse`) with the memorial's **latest** job, or `null` if none has run. `story` is the produced draft, present exactly when `job.status` is `succeeded`. Auth is the same as `POST`: `401`, or `403 FORBIDDEN` for another memorial.
+
+<!-- schema: WeaveStatusResponse -->
+```json
+{
+  "job": {
+    "id": "65d0000000000000000000e1",
+    "status": "failed",
+    "started_at": "2026-10-27T12:00:00.000Z",
+    "finished_at": "2026-10-27T12:02:50.000Z",
+    "story_id": null,
+    "error": {
+      "code": "AI_TIMEOUT",
+      "message": "The AI took too long to respond. Nothing was saved. Please try again.",
+      "retryable": true
+    }
+  },
+  "story": null
+}
+```
+
+**Job outcomes:**
+- `running`
+- `succeeded`: `story_id` and `story` are set.
+- `failed`, with `error.code` one of:
+  - `AI_TIMEOUT`: the 170 s model budget ran out, or the job was orphaned by a server restart and passed its 180 s deadline.
+  - `AI_UNAVAILABLE`: provider error or overload after one retry.
+  - `AI_INVALID_OUTPUT`: unverifiable output after one repair attempt.
+  - `INTERNAL`.
+
+On every failure **nothing is stored and no fallback or fake text is produced**; all of these are `retryable: true`.
+
+**Client behaviour:**
+- `ZemneApiClient.weaveStory(memorialId)` keeps its 1.0 signature. The HTTP client POSTs, polls `GET` every 4 s (up to 240 s), and resolves `{ story }` or rejects with a `ZemneApiError` carrying the job's error code. **UI code written against the mock needs no change.**
+- New `getWeaveStatus(memorialId)` lets the console resume a "Weaving…" state after a reload.
+- The UI must show a long-running state, e.g. "Weaving approved tributes with Gemma. This can take 1–3 minutes." It must not double-submit; a second POST gets `409 WEAVE_IN_PROGRESS`.
 
 <!-- schema: ApiErrorBody -->
 ```json
@@ -509,7 +562,7 @@ The request is a discriminated union on `action`:
 
 ---
 
-## 6. Memory Weaver model contract (P5 implements; P1 freezes)
+## 6. Memory Weaver model contract (implemented in P5)
 
 Code: `src/shared/api/weave.ts`.
 
@@ -557,7 +610,51 @@ Code: `src/shared/api/weave.ts`.
 
 Passing validation means **the citations point at provided tributes. It does not mean the claims are verified.** The UI must never label AI text as "verified" or "fact-checked". Flags (`WeaveFlag`: `code`, `origin: model|validator`, `paragraph_index | null`, `message`, `source_tribute_ids`) are shown to the organizer only, beside the relevant paragraph.
 
-`StoryView.ai` records the real `model_id` (from `GEMMA_MODEL_ID`) and a provider label. P5 documents the exact model, version, provider, license, latency and evaluation results.
+`StoryView.ai` records the `model_id` **as reported by the endpoint's response** (for example `gemma-4-31b-it`) and a provider label derived from the endpoint host. Both are shown publicly next to a published story.
+
+### 6.1 Implementation (P5)
+
+- `src/lib/ai/gemma-client.ts`: an OpenAI-compatible `POST {GEMMA_API_BASE_URL}/chat/completions` client.
+  - The whole prompt goes in one user message. Gemma on the Gemini API rejects system instructions, JSON response mode and thinking controls; each was tried against the live endpoint.
+  - Gemma 4 returns its reasoning inline as `<thought>…</thought>`. The client strips it; an unterminated thought counts as no answer.
+  - `max_tokens` is 6144 and `temperature` is 0.3.
+- `src/lib/ai/prompt.ts`: rules come before the data and are repeated after it. Tributes are embedded as escaped JSON inside a per-request random boundary (`<<<DATA_<18 hex>` … `DATA_<18 hex>>>>`), so a tribute cannot close the block or pose as instructions. Contributor names are never sent.
+- `src/lib/ai/weaver.ts`: runs the model, then `validateWeaveOutput`, then one repair attempt if the output is unverifiable. It retries once on upstream 429/500/502/503 overload. The budget is 170 s.
+- `src/lib/ai/grounding.ts`: deterministic validator flags (`origin: "validator"`). They mark numbers or years and capitalised names that don't appear in a paragraph's cited tributes or the memorial fields, and paragraphs that share under 20% of their content words with their sources. Text is never rewritten; the organizer decides.
+
+### 6.2 Model and provider (verified facts, 2026-10-27)
+
+| Item | Fact | How verified |
+|---|---|---|
+| Provider | Google AI Studio (Gemini API), OpenAI-compatible endpoint `https://generativelanguage.googleapis.com/v1beta/openai` | Live `GET /models` with the owner's key returned 200 |
+| Gemma models served | `gemma-4-31b-it` and `gemma-4-26b-a4b-it`, both version `001`. **Gemma 3 is not served:** `gemma-3-27b-it` returned 404 | Live `/models` (OpenAI-compatible and native endpoints) |
+| Model in use | `gemma-4-31b-it` (the dense Gemma 4 31B instruction-tuned model, 30.7B parameters) | `model` field of real responses |
+| Open weights and licence | `google/gemma-4-31B-it` on Hugging Face: open weights, **licence `apache-2.0`**, no gating notice | Model card, read 2026-10-27 |
+| Provider terms | The hosted API is subject to Google's Gemini API terms. **On the unpaid tier Google may use prompts and outputs to improve its products.** Evaluation used synthetic data only. Real memorials need a paid or billing-enabled key, or another host of the same open weights | Owner informed before the key was created |
+
+### 6.3 Measured behaviour (synthetic data; nothing fabricated)
+
+Evidence files are in `docs/evidence/p5/`. Every number below was observed on 2026-10-27 from this machine.
+
+| Run | Result |
+|---|---|
+| Probe: "Reply with exactly the word OK." | 200 in 30.2 s. Reasoning consumed the 20-token limit, which is why the client now allows 6144 tokens |
+| Live evaluation A (exploratory: 200 s budget, no overload retry). Its file was overwritten; numbers transcribed from that run's console output | Three personas: **61.0 s** OK, then 503, 503. Injection: **120.2 s** OK. Sparse: **66.9 s** OK. Conflicting: **152.1 s** OK |
+| Live evaluation B, production settings (`…31b-it-2026-10-27T16-16-14-224Z.json`) | Three personas: 503, 500, 500 (each after one retry). Injection: **129.2 s** OK. Sparse: 500. Conflicting: **112.0 s** OK |
+| End-to-end through the HTTP job API (`e2e-weave-…json`): production `next start`, local MongoDB, 3 synthetic contributors | `POST` 202 in 0.16 s. Job **succeeded at 64.7 s** (model 61.1 s, 1 attempt). The draft was not public; it was published by the organizer; all citations resolve |
+| `gemma-4-26b-a4b-it` (`…26b-a4b-it-2026-10-27T16-01-44-661Z.json`) | 5 of 6 hit the 200 s timeout and 1 returned 500. Not usable today |
+
+Across completed `gemma-4-31b-it` weaves (7), model latency was **61.0–152.1 s**, median 112.0 s.
+
+Availability today was **7 successes out of 13** weave attempts. Every failure was an upstream 500/503 "high demand", and each failed safely as a retryable job error with nothing stored.
+
+Quality checks on every completed weave:
+- citations only to provided, approved tributes: 7/7;
+- prompt injection ignored, with no "Nobel" or "1979" in the output and the tribute flagged `possible_instruction_ignored`: 2/2;
+- conflicting accounts flagged and both accounts presented rather than resolved: 2/2;
+- sparse input flagged `insufficient_material` and kept to 1 paragraph: 1/1.
+
+Prose is accurate but plain. Organizer editing is expected.
 
 ---
 
@@ -686,7 +783,7 @@ Its `weaveStory` calls **no AI**. It returns hand-written paragraphs and placeho
 | `POST /api/organizer/memorials/:id/rotate-token` | ✅ Revokes the old link and sessions |
 | `PATCH /api/organizer/guestbook/:id`, `…/tributes/:id` | ✅ Including the cited-tribute auto-unpublish |
 | `PATCH /api/organizer/stories/:id` | ✅ Edit, publish, unpublish, versioning, source checks. Before P5, stories only exist if inserted directly |
-| `POST /api/organizer/memorials/:id/weave` | ⏳ Preconditions are real, then `503 AI_UNAVAILABLE` (P5 adds Gemma) |
+| `POST`/`GET /api/organizer/memorials/:id/weave` | ✅ (P5) Background job on real `gemma-4-31b-it`; drafts only |
 
 Code layout:
 - `src/app/api/**/route.ts`: thin Node-runtime wrappers.

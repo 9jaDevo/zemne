@@ -86,7 +86,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
     mkdirSync("docs/evidence/p5", { recursive: true });
     const host = new URL(config.gemma!.baseUrl).host;
     writeFileSync(
-      `docs/evidence/p5/gemma-live-eval-${config.gemma!.modelId}.json`,
+      `docs/evidence/p5/gemma-live-eval-${config.gemma!.modelId}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`,
       JSON.stringify(
         {
           note: "Real responses from the configured Gemma endpoint for SYNTHETIC test tributes. Recorded as observed by tests/backend/gemma-live.test.ts.",

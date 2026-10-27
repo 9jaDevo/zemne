@@ -24,6 +24,8 @@ const SCHEMAS: Record<string, z.ZodType> = {
   StoryView: api.StoryViewSchema,
   SubmissionReceiptResponse: api.SubmissionReceiptResponseSchema,
   TributeSubmissionRequest: api.TributeSubmissionRequestSchema,
+  WeaveStartResponse: api.WeaveStartResponseSchema,
+  WeaveStatusResponse: api.WeaveStatusResponseSchema,
 };
 
 const examples = [...doc.matchAll(/<!-- schema: (\w+) -->\s*```json\s*([\s\S]*?)```/g)].map((m) => ({ name: m[1], body: m[2] }));
