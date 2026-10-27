@@ -1,160 +1,80 @@
 # P3 infrastructure handoff — October 27, 2026
 
-**Status: BLOCKED by Atlas organization policy and missing Render authentication.**
-Preparation exists; cloud provisioning, deployment and database reachability have
-not succeeded. Do not interpret local tests, the Blueprint file or the placeholder
-page as proof that a cloud resource exists.
+**Status: PARTIAL — free Render preview live; Atlas provisioned; authenticated hosting-network probe still pending.** P3 only. No Claude-owned API, model, schema, auth or AI logic changed. P2 remains unmerged draft PR #2; P3 is stacked draft [PR #3](https://github.com/9jaDevo/zemne/pull/3).
 
-## Verified access and blockers
+## Actual resources
 
-| Provider | Actual evidence | Result |
+| Resource | Verified identity | Region / status |
 | --- | --- | --- |
-| GitHub | CLI repository lookup: `https://github.com/9jaDevo/zemne`, PUBLIC, default branch `main` | Available; P2 remains draft PR #2 awaiting visual review |
-| Atlas | Connected MongoDB Atlas tools expose organization/project/cluster/user/network actions | Two read-only discovery calls failed with the organization-policy error below |
-| Render plugin | Directory lookup returned Render with `installed: false`; no Render action tools present | Not installed/connected in this session |
-| Render browser | `https://dashboard.render.com` redirected to `/login`, with empty sign-in fields | No authenticated workspace/service accessible |
-| Local secrets | Presence-only check: all five backend variables absent; `.env`, `.env.local`, `.env.production` absent | No credentials available for a database probe |
+| Public GitHub | https://github.com/9jaDevo/zemne; created 2026-10-27T09:07:38Z | PUBLIC, main default |
+| Atlas organization | `689b3913190aeb046ace2bf1` | AI-client access enabled by owner |
+| Atlas project | `ZEMNE`, `6ae08765a24262dfc8a76737` | Dedicated project created |
+| Atlas cluster | `zemne-mvp`, `6ae087883c6794a404b3da66` | FREE, AWS US_EAST_1, MongoDB 8.0.34, active |
+| DB user | `zemne_app` | Owner submitted prepared Chrome form; connector verifies ONLY `readWrite` on `zemne`, scope CLUSTER `zemne-mvp` |
+| Atlas IP access | `74.220.49.0/24`, `74.220.57.0/24` | Both ACTIVE in Chrome; actual Render Virginia outbound ranges |
+| Render workspace | `tea-d5e1hp1r0fns73au271g` | Signed-in owner workspace |
+| Render service | `zemne-preview`, `srv-dbg8g40m7kps73bnh6e0` | Node FREE, Virginia (US East) |
+| HTTPS preview | https://zemne-preview.onrender.com/provisioning | Actual HTTP 200; explicitly says final demo is not live yet |
 
-Atlas error, quoted without modification except omission of the unusable URL placeholder:
+No `0.0.0.0/0`, developer IP, paid service, disk or persistent upload storage added. Render regional CIDRs are shared infrastructure; cluster-scoped credentials remain essential. Original neutral portrait assets retained.
 
-> MCP access is disabled for every MongoDB Atlas organization this user belongs to (1 total), so no Atlas data is reachable over MCP. Retrying or re-authenticating will not change this.
+## Actual deployment settings
 
-The connector also says an Organization Owner must enable AI client access. No
-retry, reauthentication workaround, direct API bypass or alternate Atlas browser
-action was attempted after this explicit governance blocker.
+Source: `9jaDevo/zemne`, branch `codex/p3-infrastructure`, repository root. Auto-deploy OFF, manual deployments only. Node `24.11.1`, `NODE_ENV=production`, `NEXT_TELEMETRY_DISABLED=1`.
 
-Owner action: in Atlas **Organization Settings → App Connections**, review and
-enable the AI-client access mode appropriate for provisioning. This setting is
-organization-wide and applies to supported AI clients as a group; it is not a
-grant limited to this chat. Have the Organization Owner review that scope first.
-See [MongoDB's official access instructions](https://www.mongodb.com/docs/mcp-server/remote-mcp/manage-ai-client-access/).
-
-For Render, install/connect the available Render integration, or sign in to the
-open dashboard. Confirm the workspace and free-only plan before creation. No
-password, API key, database URI or session secret should be sent in chat.
-
-## Resource inventory — actual values only
-
-| Resource | ID/name | Region | URL/status |
-| --- | --- | --- | --- |
-| GitHub repo | `9jaDevo/zemne` | n/a | Public URL verified above |
-| Atlas organization | ID/name unavailable; connector reports one organization | Unverified | Organization policy denies discovery |
-| Atlas project | Unverified; not created by this run | Unverified | No project ID available |
-| Atlas cluster | Unverified; not created by this run | Unverified | No cluster ID or hostname available |
-| Atlas application DB user | Unverified; not created by this run | n/a | No credential generated |
-| Atlas IP allowlist / minimum TLS | Not inspected or changed | n/a | No exposure or TLS setting changed |
-| Render workspace | Not selected/authenticated | Unverified | Sign-in required |
-| Render web service | Not created/verified by this run | Unverified | No service ID, deployment ID or public service URL |
-| MongoDB reachability | No authenticated attempt possible | n/a | Probe reports `not_configured`; no successful ping |
-
-## Prepared deployment candidate
-
-`render.yaml` is **unapplied**, reviewed against Render's current documentation:
-
-- Node web service, proposed name `zemne-preview`, explicit **free** plan.
-- Proposed Render region `virginia`; pairing candidate Atlas AWS `US_EAST_1`.
-  These are proposals, not actual resource locations. Confirm before creation.
-- Source repository `https://github.com/9jaDevo/zemne`, branch
-  `codex/p3-infrastructure`. This is a stacked branch based on the unmerged P2
-  preview; do not merge P2 or deploy a different branch without recording it.
-- Build: `npm ci && npm run build`.
-- Start: `npm run start -- --hostname 0.0.0.0`; Next.js consumes Render's `PORT`.
-- Node pinned to `24.11.1`; `NODE_ENV=production`; telemetry disabled.
-- Auto-deploy is off. No paid instances, disk, custom domain or media service.
-- Temporary health check `/provisioning` proves page-serving only. It is visibly
-  labeled as an infrastructure preview, not the final demo. It does not claim DB
-  or AI health. Claude's `/api/health` is not implemented or overwritten by P3.
-- All five required backend variable names are declared. Render generates
-  `SESSION_SECRET` server-side; the remaining values use `sync: false`.
-
-Render prompts for `sync: false` values during initial Blueprint creation. The
-Gemma endpoint/model/key have not been selected in P3. Do not enter made-up values
-to satisfy the form. For an initial placeholder service, omit unavailable Gemma
-entries from the actual service setup, record their names as pending, and add real
-provider settings securely in P5. If Atlas is still blocked, a placeholder can
-build without `MONGODB_URI`; it must not be described as database-ready. The
-candidate Blueprint is not currently ready for an unattended apply.
-
-References: [Next.js on Render](https://render.com/docs/deploy-nextjs-app),
-[Blueprint variables and generated values](https://render.com/docs/blueprint-spec).
-
-## Resume sequence after access is confirmed
-
-1. Re-discover Atlas organizations/projects and Render workspaces; reuse a verified
-   ZEMNE resource if one already exists. Do not assume names imply ownership.
-2. Confirm the owner/workspace and regions. Create a dedicated ZEMNE Atlas project
-   and free cluster if eligible. Stop for billing, unavailable free capacity or
-   an additional permission grant; never silently upgrade to paid infrastructure.
-3. Create an application user scoped to that cluster with **`readWrite` on database
-   `zemne` only**. No `atlasAdmin`, `dbAdminAnyDatabase` or all-database role.
-   Store its generated password only in secure local/Render settings, never in
-   tool output, screenshots, Git or this document. Leave models/indexes to Claude.
-4. Create the free Render service with the reviewed source/build/start/placeholder
-   settings. Record the actual workspace/service/deploy IDs, region and URL.
-5. In that service's **Connect → Outbound** view, obtain its actual outbound CIDRs.
-   Allowlist those ranges in Atlas. Never guess ranges or add `0.0.0.0/0` to get a
-   green test. Any temporary developer `/32` needs explicit approval and cleanup.
-   Region ranges are shared by Render services; DB authentication and cluster
-   scope remain essential. See [Render outbound IP documentation](https://render.com/docs/outbound-ip-addresses).
-6. Require TLS with certificate validation. Inspect the cluster's TLS settings
-   when access permits. Save a `mongodb+srv` URI targeting `/zemne` in Render's
-   secure `MONGODB_URI` setting and an ignored local environment only if needed.
-7. Run the standalone probe from the hosting network, record only its sanitized
-   result and confirm the app user's roles/scopes through Atlas. A local pass
-   proves local reachability only; it does not prove Render-to-Atlas access.
-8. Inspect actual Render build/deploy logs without copying secret values, then
-   fetch the real `/provisioning` URL over HTTPS. Mark success only from these
-   actual provider and network results. Keep all P4/P5 business routes untouched.
-
-## Backend-only probe and Claude handoff
-
-`scripts/infra/probe-mongodb.mjs` performs an authenticated ping and reads the
-connection's effective roles. It writes no data and serves no HTTP endpoint.
-It rejects a database other than `zemne` and unsafe TLS settings, forces certificate
-validation, times out, and never prints raw driver errors or URI values.
-
-Once Claude installs the application's MongoDB driver in P4, it can be run with:
+Build command:
 
 ```sh
-node --env-file=.env.local scripts/infra/probe-mongodb.mjs
+npm ci --include=dev && npm install --prefix .infra-tools --no-save --no-package-lock mongodb@7.7.0 && npm run build
 ```
 
-On a host with secure injected variables, omit `--env-file`. If the app driver is
-not installed yet, it may instead be installed in the ignored tooling directory:
+Start command:
 
 ```sh
-npm install --prefix .infra-tools --no-save --no-package-lock mongodb
-node --env-file=.env.local scripts/infra/probe-mongodb.mjs
+node scripts/infra/render-start.mjs
 ```
 
-No driver was installed by P3 while access was blocked. Do not change application
-dependency choices solely for this probe. Exit statuses: 0 ping + expected role;
-1 authentication/connect failure; 2 missing/invalid config or driver; 3 role review
-required. An unknown/custom role requires human/Atlas inspection, not automatic
-permission broadening.
+The driver is isolated infrastructure tooling; application dependencies and lockfile remain unchanged. Health path `/provisioning` checks page serving only. `/api/health` remains 404 until Claude implements it. The placeholder starts even if the DB probe fails, so Render green status is not database readiness.
 
-| Backend variable | Confirmed local | Confirmed Render | Handoff |
-| --- | --- | --- | --- |
-| `MONGODB_URI` | Absent | Not set by this run | Blocked until cluster/user/network setup |
-| `SESSION_SECRET` | Absent | Not set by this run | Render-generated candidate; never put value in Git |
-| `GEMMA_API_BASE_URL` | Absent | Not set by this run | Actual P5 inference provider required |
-| `GEMMA_MODEL_ID` | Absent | Not set by this run | Actual P5 model required |
-| `GEMMA_API_KEY` | Absent | Not set by this run | Optional, only if the actual provider requires it |
+`render.yaml` records the manually provisioned service; it is not an applied Blueprint. Do not apply it as a second service. Its session-secret generation declaration describes clean provisioning; this service already has a locally generated secret securely configured.
 
-Claude must not interpret declared names as configured values. DB/network tests
-and the P3 gate remain blocked. No provider/model choice, collection, index,
-session implementation or API/AI business logic was added. Neutral original
-portrait placeholders remain the media strategy; persistent uploads are not
-approved or provisioned.
+First deploy `dep-dbg8g48m7kps73bnh73g` failed because production npm installation omitted the Tailwind build dependency. Fixed with `npm ci --include=dev`, commit `a0aa9c56a8c33033747ac1ed2bce2ea0409eb681`. Actual successful deploy `dep-dbg8k2d9fdbs73d3mc9g` took 1m14s. Startup-probe update: `be463f93200d9ffb16afef0e45b01ddc15a87a8d`; its deployment result will be recorded below.
 
-## Evidence and rollback
+## Secure variable handoff
 
-`docs/evidence/p3/render-signin-required.png` records the blank Render sign-in page.
-Local build/test results and safe probe failures are recorded under P3 in the
-tracker. Local validation is not Render build/deploy evidence.
+| Name | Confirmed state | Next owner |
+| --- | --- | --- |
+| `MONGODB_URI` | Name exists on Render; owner secure URI entry pending confirmation/probe | P3 verifies access after entry |
+| `SESSION_SECRET` | Nonempty cryptographically random value securely saved on Render | Claude consumes backend-only |
+| `GEMMA_API_BASE_URL` | Name exists, blank | Claude P5 selects actual provider |
+| `GEMMA_MODEL_ID` | Name exists, blank | Claude P5 selects actual Gemma model |
+| `GEMMA_API_KEY` | Name exists, blank | Claude P5 if actual provider requires it |
 
-The branch adds only the deployment candidate, placeholder, standalone probe,
-ignored tooling path and handoff/evidence. No cloud mutation occurred, so there is
-no cloud rollback to execute. Future deployments should retain the previous
-Render deploy ID for rollback. Do not delete an Atlas project/cluster/user as a
-rollback shortcut without checking ownership and obtaining deletion approval.
+Private local session-secret file is outside the repository at `C:\Users\hp\.codex\secrets\zemne\p3.env`, with restricted user ACL. No database password/URI was generated or retained locally by Codex. Never copy values into Git, logs, screenshots, chat or NEXT_PUBLIC variables. Credential entry/submission was handed to the owner under browser-use policy. No fake Gemma configuration was entered.
+
+The previous Atlas organization-policy and Render sign-in blockers were resolved by the owner. Connector database-user and access-list writes still returned missing-tool-confirmation errors even after explicit approval. At the owner's request, Chrome was used: network entries saved and verified ACTIVE; exact database user form prepared and owner clicked Add User. Read-only connector verification confirms the final least-privilege role and cluster scope.
+
+## Backend-only access test
+
+`scripts/infra/probe-mongodb.mjs` reads only injected `MONGODB_URI`, requires database `/zemne`, enforces TLS with certificate/hostname validation, performs ping and connectionStatus, and checks the only effective role is `readWrite` on `zemne`. It writes no data, exposes no HTTP endpoint, and suppresses raw driver errors and credentials.
+
+`scripts/infra/render-start.mjs` runs that probe on the actual Render runtime network before starting Next. Logs contain only an allowlisted status and role-check boolean. Timeout/failure never prints child stderr. Read the deployment logs for sanitized `probe: mongodb`, `status: ok`, `expected_role_only: true`. A missing-config result is not a connectivity pass. Cluster minimum TLS version has not independently been inspected; the client probe enforces validated TLS.
+
+With a securely injected environment, Claude can run:
+
+```sh
+node scripts/infra/probe-mongodb.mjs
+```
+
+For an ignored local env file, use `node --env-file=.env.local scripts/infra/probe-mongodb.mjs`; local access requires its own explicitly approved narrow network path. Do not open network access just to make a local check pass. Exit 0: authenticated ping and expected role; 1: auth/connect failed; 2: config/driver missing or unsafe; 3: role review required. Never broaden permissions automatically.
+
+## Validation, limitations and rollback
+
+Lint (zero warnings), typecheck, 7 test files / 83 tests passed for startup commit. Script syntax and Git whitespace checks passed. Earlier P3 local build and actual Render production build passed. Public placeholder browser screenshot is `docs/evidence/p3/render-placeholder-live.png`; active network table is `docs/evidence/p3/atlas-render-network.png`. Initial sign-in screenshot is historical only.
+
+No real DB-backed lifecycle, persistence across redeploy, Gemma generation or final demo acceptance is claimed. Those require later Claude/backend and integration phases. The free Render service sleeps with inactivity and lacks shell/one-off jobs; startup probe supplies hosting-network evidence without paid upgrades.
+
+Rollback: retain known successful Render deploy `dep-dbg8k2d9fdbs73d3mc9g`; restore its earlier start command `npm run start -- --hostname 0.0.0.0` and build `npm ci --include=dev && npm run build` if needed. Do not delete Atlas resources as a rollback shortcut. No unrelated services were modified.
+
+Latest startup deployment: dep-dbgb00sipgvc73f1ubkg, source be463f9, succeeded/live in 1m19s. Actual Render runtime probe: not_configured, expected_role_only false. Database access is still unverified pending secure URI entry.
+`nRemote Linux CI for be463f9 passed installation, lint, typecheck, 83 tests and build: https://github.com/9jaDevo/zemne/actions/runs/40517904603 and https://github.com/9jaDevo/zemne/actions/runs/40517895110.
