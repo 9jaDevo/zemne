@@ -77,4 +77,4 @@ No real DB-backed lifecycle, persistence across redeploy, Gemma generation or fi
 Rollback: retain known successful Render deploy `dep-dbg8k2d9fdbs73d3mc9g`; restore its earlier start command `npm run start -- --hostname 0.0.0.0` and build `npm ci --include=dev && npm run build` if needed. Do not delete Atlas resources as a rollback shortcut. No unrelated services were modified.
 
 Latest startup deployment: dep-dbgb00sipgvc73f1ubkg, source be463f9, succeeded/live in 1m19s. Actual Render runtime probe: not_configured, expected_role_only false. Database access is still unverified pending secure URI entry.
-`nRemote Linux CI for be463f9 passed installation, lint, typecheck, 83 tests and build: https://github.com/9jaDevo/zemne/actions/runs/40517904603 and https://github.com/9jaDevo/zemne/actions/runs/40517895110.
+Remote Linux CI for be463f9 passed installation, lint, typecheck, 83 tests and build: https://github.com/9jaDevo/zemne/actions/runs/40517904603 and https://github.com/9jaDevo/zemne/actions/runs/40517895110.
