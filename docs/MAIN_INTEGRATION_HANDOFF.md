@@ -34,6 +34,8 @@ Run standard commands on the consolidated tree: `npm run lint`,
 `verify` check before the PR merges. Exact final command/CI results and merge
 reference are recorded in the tracker integration addendum and GitHub PR.
 
+Local validation on consolidated tree `6a516a5`: all four standard commands passed, including **207 tests passed and nine opt-in live tests skipped**, with no default-command timeout. Dependency files were unchanged by P7; GitHub CI performs a fresh npm ci. Subsequent integration-document commits do not change application code.
+
 ## Submission gates still open
 
 - Deploy the consolidated main commit to Render and record its actual source SHA.

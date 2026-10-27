@@ -307,4 +307,4 @@ Standard final npm test result: 203 passed, nine live tests skipped, one Claude-
 
 - Integrated all authored P1–P7 application branches and the Garden of Light redesign with original commit ancestry. Claude P7 source was merged unchanged in 9bb6aa1. Consolidation details and remaining submission gates: `docs/MAIN_INTEGRATION_HANDOFF.md`.
 - Historical Antigravity report and JSON evidence preserved; raw screenshots and local audit tooling are retained privately pending credential review. Its original tracker edits remain in the named local stash, rather than marking unverified current-main gates complete.
-- Validation and remote merge evidence will be recorded after required checks pass. No deployment or submission is implied.
+- Local consolidated tree `6a516a5`: lint (zero warnings), typecheck, standard npm test (**207 passed, 9 opt-in live tests skipped**) and production build all passed. Required remote verify check must pass before merge. No deployment or submission is implied.
