@@ -9,8 +9,8 @@ services:
     repo: https://github.com/9jaDevo/zemne
     branch: codex/p3-infrastructure
     autoDeployTrigger: off
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm run start -- --hostname 0.0.0.0
+    buildCommand: npm ci --include=dev && npm install --prefix .infra-tools --no-save --no-package-lock mongodb@7.7.0 && npm run build
+    startCommand: node scripts/infra/render-start.mjs
     healthCheckPath: /provisioning
     envVars:
       - key: NODE_VERSION
