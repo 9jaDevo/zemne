@@ -14,6 +14,7 @@ This is Codex's implementation verification, not Antigravity's independent P7 au
 | `scripts/p2-qa.cjs` | 16 browser checks passed; zero page errors; zero `/api/*` requests |
 | Browser | Chromium 151.0.7922.34, headless SwiftShader, real WebGL 2.0 |
 | Horizontal overflow | None at 375, 390, 768, 1440 CSS px on the hall |
+| Chromium mobile touch emulation | All 3 actual scene markers opened the matching destinations via `touchscreen.tap` at 390 × 844; `touch-results.json` |
 | `scripts/p2-a11y.cjs` | 16 axe checks: 8 route/states × 390/1440px; zero WCAG 2 A/AA + 2.1 AA violations reported |
 | Asset validation | SVGs parse via Sharp; PNG dimensions 16/32/180/192/512 exact; ICO header verified |
 
