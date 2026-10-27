@@ -14,7 +14,7 @@
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
 | P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
 | P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
-| P3 | Codex | Atlas + Render provisioning | PARTIAL — free preview live, Atlas scoped user/network verified; URI format correction and authenticated probe pending |
+| P3 | Codex | Atlas + Render provisioning | COMPLETE — free preview live; Atlas scoped access and Render runtime TLS ping verified |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
 | P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
@@ -104,11 +104,11 @@
 - [x] Create dedicated Atlas project and FREE cluster; verify least-privilege application user and active Render network ranges.
 - [x] Provision FREE Render service connected to public repository; build and HTTPS placeholder verified.
 - [x] Keep secrets in secure local/hosting configuration; no values committed or exposed.
-- [x] Declare all five backend names on Render; session secret configured; database URI and Gemma values require the secure handoff below.
+- [x] Declare all five backend names on Render; session secret and database URI securely configured; Gemma values deferred to P5.
 - [x] Retain original neutral placeholder assets; no persistent upload/storage resource required or provisioned.
-- [ ] Verify authenticated MongoDB reachability from Render runtime after owner saves URI.
+- [x] Verify authenticated MongoDB reachability from Render runtime after owner saves URI.
 - [x] Record actual resource IDs, regions, service URL and deployment evidence.
-**Status / gate:** PARTIAL. Infrastructure preview is live; database access gate remains open. No final-demo or database-readiness claim.
+**Status / gate:** COMPLETE for P3. Infrastructure preview is live; authenticated TLS ping and least-privilege access verified from Render runtime. No final-demo or application persistence-readiness claim.
 **Evidence:** Draft https://github.com/9jaDevo/zemne/pull/3 | Source startup commit `be463f93200d9ffb16afef0e45b01ddc15a87a8d` | HTTPS https://zemne-preview.onrender.com/provisioning | `docs/evidence/p3/render-placeholder-live.png`, `atlas-render-network.png`, `atlas-scoped-user.png`.
 **Handoff to Claude:** `docs/P3_INFRASTRUCTURE_HANDOFF.md`; backend variables must remain server-only. No P4/P5/P6 implementation performed.
 
@@ -126,6 +126,8 @@
 - **Remaining gate / exact next action:** owner saves existing user's TLS URI with `/zemne` directly in Render MONGODB_URI, no value in chat. Restart/redeploy and verify sanitized `status: ok`, `expected_role_only: true` from Render runtime, then record deployment ID. Claude may consume SESSION_SECRET now; database acceptance must wait for probe. P5 Gemma settings remain pending. No later phase started.
 
 - **URI follow-up:** owner confirmed saving MONGODB_URI. Actual deploy `dep-dbgb2kqfngtc7397a6u0`, source `23e9cf4f53b6282045561ffebe22f427451c4258`, succeeded/live; runtime probe returned `invalid_or_unsafe_configuration`. Secure browser checks returned booleans only: value present, MongoDB scheme present, URI not parseable. Value was not displayed, copied or changed. Owner asked to replace it from Atlas Drivers with URL-encoded password and database `/zemne`; authenticated access remains blocked on configuration correction. Earlier `not_configured` result is historical. No additional permissions or network access requested.
+- **Final verification — P3 COMPLETE:** owner corrected URI securely. Direct Chrome Render logs verify deploy `dep-dbgb6iifngtc7397jki0`, source `44a20f2d442d15fad3030547cb5c3362e4680420`, started October 27 at 10:20:58 AM EDT, succeeded/live in 1m27s. Runtime at 10:22:11 AM EDT emitted `status: ok`, `expected_role_only: true`, scope Render runtime network. Probe enforces TLS/certificate/hostname validation and database zemne; ping and expected effective role passed with no writes. Screenshot `docs/evidence/p3/render-database-probe-ok.png`. This supersedes historical missing/invalid URI gates above.
+- **Exact final handoff to Claude:** MONGODB_URI and SESSION_SECRET securely available on Render; Gemma base URL/model/key names present but blank for P5. Use injected environment with `node scripts/infra/probe-mongodb.mjs`; local secrets and any additional narrow developer IP access require secure owner setup. Current app user only readWrite@zemne, scoped to zemne-mvp; current network allows actual Render outbound CIDRs only. No raw secrets recorded or final URI retrieved. No API/models/auth/AI implementation changed. P3 complete; stop before P4/P5/P6. Final demo, real lifecycle/persistence and AI acceptance remain later gates.
 ## P4 — Core backend and moderation [CLAUDE]
 - [ ] Implement `memorials`, `guestbook_entries`, `tributes`, `story_drafts` collections and indexes.
 - [ ] Implement memorial creation with unique slug and high-entropy organizer secret; store hash only.

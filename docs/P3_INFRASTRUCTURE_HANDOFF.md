@@ -1,6 +1,6 @@
 # P3 infrastructure handoff — October 27, 2026
 
-**Status: PARTIAL — free Render preview live; Atlas provisioned; authenticated hosting-network probe still pending.** P3 only. No Claude-owned API, model, schema, auth or AI logic changed. P2 remains unmerged draft PR #2; P3 is stacked draft [PR #3](https://github.com/9jaDevo/zemne/pull/3).
+**Status: COMPLETE for P3 — free Render preview live; Atlas least-privilege access and authenticated TLS ping verified from Render runtime.** P3 only. No Claude-owned API, model, schema, auth or AI logic changed. P2 remains unmerged draft PR #2; P3 is stacked draft [PR #3](https://github.com/9jaDevo/zemne/pull/3).
 
 ## Actual resources
 
@@ -44,7 +44,7 @@ First deploy `dep-dbg8g48m7kps73bnh73g` failed because production npm installati
 
 | Name | Confirmed state | Next owner |
 | --- | --- | --- |
-| `MONGODB_URI` | Name exists on Render; Owner saved value; format invalid, correction/probe pending | P3 verifies access after entry |
+| `MONGODB_URI` | Securely configured on Render; authenticated TLS ping and role check passed | Claude consumes backend-only |
 | `SESSION_SECRET` | Nonempty cryptographically random value securely saved on Render | Claude consumes backend-only |
 | `GEMMA_API_BASE_URL` | Name exists, blank | Claude P5 selects actual provider |
 | `GEMMA_MODEL_ID` | Name exists, blank | Claude P5 selects actual Gemma model |
@@ -76,9 +76,20 @@ No real DB-backed lifecycle, persistence across redeploy, Gemma generation or fi
 
 Rollback: retain known successful Render deploy `dep-dbg8k2d9fdbs73d3mc9g`; restore its earlier start command `npm run start -- --hostname 0.0.0.0` and build `npm ci --include=dev && npm run build` if needed. Do not delete Atlas resources as a rollback shortcut. No unrelated services were modified.
 
-Latest startup deployment: dep-dbgb00sipgvc73f1ubkg, source be463f9, succeeded/live in 1m19s. Actual Render runtime probe: not_configured, expected_role_only false. Database access is still unverified pending secure URI entry.
+Historical startup deployment: dep-dbgb00sipgvc73f1ubkg, source be463f9, succeeded/live in 1m19s. Actual Render runtime probe: not_configured, expected_role_only false. At that point database access was unverified; final verification below supersedes this result.
 Remote Linux CI for be463f9 passed installation, lint, typecheck, 83 tests and build: https://github.com/9jaDevo/zemne/actions/runs/40517904603 and https://github.com/9jaDevo/zemne/actions/runs/40517895110.
 
-## URI follow-up — current gate
+## URI correction history — resolved
 
-Owner confirmed saving MONGODB_URI. Deployment `dep-dbgb2kqfngtc7397a6u0` from `23e9cf4f53b6282045561ffebe22f427451c4258` succeeded/live, but its actual Render runtime probe returned `invalid_or_unsafe_configuration`. This supersedes the historical missing-config result. Secure UI checks reported only booleans: a value exists and begins with the MongoDB scheme, but URL parsing fails. No value, raw exception, hostname or password was printed/copied/changed. Owner correction requested: use Atlas Connect → Drivers template, URL-encode password special characters, target `/zemne`, save in Render. P3 remains PARTIAL until authenticated hosting-network ping passes. This is a configuration gate, not evidence of an Atlas connectivity failure.
+Owner confirmed saving MONGODB_URI. Deployment `dep-dbgb2kqfngtc7397a6u0` from `23e9cf4f53b6282045561ffebe22f427451c4258` succeeded/live, but its actual Render runtime probe returned `invalid_or_unsafe_configuration`. This supersedes the historical missing-config result. Secure UI checks reported only booleans: a value exists and begins with the MongoDB scheme, but URL parsing fails. No value, raw exception, hostname or password was printed/copied/changed. Owner correction requested: use Atlas Connect → Drivers template, URL-encode password special characters, target `/zemne`, save in Render. This historical blocker was resolved by the owner; see final verification below. This is a configuration gate, not evidence of an Atlas connectivity failure.
+## Final P3 verification and Claude handoff
+
+Verified directly in signed-in Chrome Render logs: deployment `dep-dbgb6iifngtc7397jki0`, source `44a20f2d442d15fad3030547cb5c3362e4680420`, manually started October 27, 2026 at 10:20:58 AM EDT, succeeded/live in 1m27s. At 10:22:11 AM EDT the actual runtime emitted:
+
+```json
+{"probe":"mongodb","status":"ok","expected_role_only":true,"scope":"Render runtime network","deployment_is_database_readiness":false}
+```
+
+This confirms TLS-enforced authenticated ping to database zemne and only the expected readWrite@zemne effective role from the hosting network. Atlas connector independently verified cluster scope zemne-mvp. Evidence: `docs/evidence/p3/render-database-probe-ok.png`. No data was written. The owner corrected and saved the URI securely; Codex did not retrieve or record the final value.
+
+Claude can now consume MONGODB_URI and SESSION_SECRET from Render secure environment. For local work, the owner must supply secrets through an ignored local configuration and separately authorize any required narrow developer IP access; the current allowlist is Render-only. Run the standalone probe using injected environment as documented above. GEMMA_API_BASE_URL, GEMMA_MODEL_ID and GEMMA_API_KEY remain blank placeholders for P5, not configured inference. No backend API, schema, auth, AI logic or application driver dependency was changed. P3 is complete; stop before P4/P5/P6. The service remains a truthful infrastructure preview, not a finished demo; persistence lifecycle and production acceptance remain later gates.
