@@ -4,7 +4,9 @@
  */
 import { ObjectId } from "mongodb";
 import {
+  DEFAULT_ERROR_MESSAGES,
   ModerationRequestSchema,
+  RETRYABLE_CODES,
   OrganizerSessionRequestSchema,
   StoryUpdateRequestSchema,
   WeaveRequestSchema,
@@ -20,12 +22,16 @@ import {
   type OrganizerSessionResponse,
   type RotateTokenResponse,
   type StoryUpdateResponse,
-  type WeaveResponse,
+  type WeaveJob,
+  type WeaveStartResponse,
+  type WeaveStatusResponse,
 } from "../../shared/api";
-import { WeaveError, weaveRemembrance, type WeaveResult } from "../../lib/ai/weaver";
+import type { GemmaClient } from "../../lib/ai/gemma-client";
+import { WEAVE_BUDGET_MS, WeaveError, weaveRemembrance, type WeaveResult } from "../../lib/ai/weaver";
 import { collections, type Collections } from "../../lib/db/schema";
-import type { StoryDraftDoc, StoryParagraphDoc } from "../../lib/db/types";
+import type { MemorialDoc, StoryDraftDoc, StoryParagraphDoc, WeaveJobDoc } from "../../lib/db/types";
 import { assertMemorialScope, enforceRate, requireOrganizer } from "../auth";
+import { runInBackground, type ServerDeps } from "../deps";
 import { HttpError, objectIdParam, parseBody, readJson, requireSecret, type Handler } from "../http";
 import {
   toOrganizerGuestbookEntry,
@@ -185,12 +191,104 @@ export const moderateTribute: Handler = async (ctx) => {
 /** Most approved tributes (oldest first) and characters sent to the model per weave. */
 export const WEAVE_MAX_TRIBUTES = 40;
 export const WEAVE_MAX_CHARS = 40_000;
-const WEAVE_LOCK_MS = 90_000;
+/** Job deadline: model budget plus slack for persistence. */
+const WEAVE_JOB_MS = WEAVE_BUDGET_MS + 10_000;
+
+type JobError = NonNullable<WeaveJobDoc["error_code"]>;
+
+/** A `running` job past its deadline (e.g. the server restarted mid-weave) counts as timed out. */
+function effectiveJob(job: WeaveJobDoc | null | undefined, now: Date): WeaveJobDoc | null {
+  if (!job) return null;
+  if (job.status === "running" && job.deadline <= now) {
+    return { ...job, status: "failed", finished_at: job.deadline, error_code: "AI_TIMEOUT" };
+  }
+  return job;
+}
+
+function toJobView(job: WeaveJobDoc): WeaveJob {
+  const code = job.error_code;
+  return {
+    id: job.id.toHexString(),
+    status: job.status,
+    started_at: job.started_at.toISOString(),
+    finished_at: job.finished_at ? job.finished_at.toISOString() : null,
+    story_id: job.story_id ? job.story_id.toHexString() : null,
+    error: job.status === "failed" && code ? { code, message: DEFAULT_ERROR_MESSAGES[code], retryable: RETRYABLE_CODES.has(code) } : null,
+  };
+}
+
+async function runWeaveJob(
+  c: Collections,
+  deps: ServerDeps,
+  client: GemmaClient,
+  memorial: MemorialDoc,
+  sources: { id: string; content: string }[],
+  jobId: ObjectId,
+  requestId: string,
+): Promise<void> {
+  const finish = (set: Partial<WeaveJobDoc>) =>
+    c.memorials.updateOne(
+      { _id: memorial._id, "weave_job.id": jobId, "weave_job.status": "running" },
+      { $set: Object.fromEntries(Object.entries({ ...set, finished_at: deps.now() }).map(([k, v]) => [`weave_job.${k}`, v])) },
+    );
+  let result: WeaveResult;
+  try {
+    result = await weaveRemembrance(
+      client,
+      { name: memorial.name, birth_year: memorial.birth_year, death_year: memorial.death_year, description: memorial.description },
+      sources,
+    );
+  } catch (error) {
+    const code: JobError = error instanceof WeaveError ? error.code : "INTERNAL";
+    // Safe operational log: code + coarse detail only, never prompt/output text.
+    console.warn(JSON.stringify({ event: "weave_failed", request_id: requestId, code, detail: error instanceof WeaveError ? error.detail : (error as { name?: string })?.name }));
+    await finish({ status: "failed", error_code: code });
+    return;
+  }
+
+  const created = deps.now();
+  const story: StoryDraftDoc = {
+    _id: new ObjectId(),
+    memorial_id: memorial._id,
+    status: "draft", // the AI never publishes
+    version: 1,
+    title: result.draft.title,
+    paragraphs: result.draft.paragraphs.map((p) => ({ text: p.text, source_tribute_ids: p.source_tribute_ids.map((id) => new ObjectId(id)) })),
+    flags: result.draft.flags.map((f) => ({ ...f, source_tribute_ids: f.source_tribute_ids.map((id) => new ObjectId(id)) })),
+    input_tribute_ids: sources.map((s) => new ObjectId(s.id)),
+    model_id: result.modelId.slice(0, 120),
+    provider_label: result.providerLabel.slice(0, 120),
+    edited_by_organizer: false,
+    created_at: created,
+    updated_at: created,
+    published_at: null,
+  };
+  try {
+    await c.stories.insertOne(story);
+  } catch (error) {
+    console.error(JSON.stringify({ event: "weave_store_failed", request_id: requestId, error: (error as { name?: string })?.name }));
+    await finish({ status: "failed", error_code: "INTERNAL" });
+    return;
+  }
+  await finish({ status: "succeeded", story_id: story._id });
+  console.info(
+    JSON.stringify({
+      event: "weave_ok",
+      request_id: requestId,
+      model: story.model_id,
+      latency_ms: result.latencyMs,
+      attempts: result.attempts,
+      tributes: sources.length,
+      paragraphs: story.paragraphs.length,
+      flags: story.flags.length,
+    }),
+  );
+}
 
 /**
- * Weave: approved tributes only -> real Gemma -> validated draft (never published).
- * Without a configured endpoint, or on any AI failure, nothing is stored and no
- * substitute text is produced.
+ * POST weave: approved tributes only -> real Gemma -> validated draft (never
+ * published). Starts a background job and returns 202 immediately; poll GET.
+ * Without a configured endpoint nothing starts and no substitute text exists.
  */
 export const weave: Handler = async (ctx) => {
   parseBody(WeaveRequestSchema, await readJson(ctx.request));
@@ -199,6 +297,7 @@ export const weave: Handler = async (ctx) => {
   assertMemorialScope(auth, ctx.params.id);
   const mid = auth.memorial._id;
   const now = ctx.deps.now();
+  if (effectiveJob(auth.memorial.weave_job, now)?.status === "running") throw new HttpError("WEAVE_IN_PROGRESS");
   await enforceRate(c, RATE_RULES.weaveMemorial, auth.session.mid, now);
 
   const approved = await c.tributes
@@ -215,68 +314,42 @@ export const weave: Handler = async (ctx) => {
     .filter((t) => (chars += t.content.length) <= WEAVE_MAX_CHARS)
     .map((t) => ({ id: t._id.toHexString(), content: t.content }));
 
-  const lockUntil = new Date(now.getTime() + WEAVE_LOCK_MS);
-  const locked = await c.memorials.findOneAndUpdate(
-    { _id: mid, $or: [{ weave_lock_until: { $exists: false } }, { weave_lock_until: null }, { weave_lock_until: { $lte: now } }] },
-    { $set: { weave_lock_until: lockUntil } },
-  );
-  if (!locked) throw new HttpError("WEAVE_IN_PROGRESS");
-
-  let result: WeaveResult;
-  try {
-    result = await weaveRemembrance(
-      client,
-      {
-        name: auth.memorial.name,
-        birth_year: auth.memorial.birth_year,
-        death_year: auth.memorial.death_year,
-        description: auth.memorial.description,
-      },
-      sources,
-    );
-  } catch (error) {
-    if (error instanceof WeaveError) {
-      // Safe operational log: code + coarse detail only, never prompt/output text.
-      console.warn(JSON.stringify({ event: "weave_failed", request_id: ctx.requestId, code: error.code, detail: error.detail }));
-      throw new HttpError(error.code);
-    }
-    throw error;
-  } finally {
-    await c.memorials.updateOne({ _id: mid, weave_lock_until: lockUntil }, { $set: { weave_lock_until: null } });
-  }
-
-  const created = ctx.deps.now();
-  const story: StoryDraftDoc = {
-    _id: new ObjectId(),
-    memorial_id: mid,
-    status: "draft", // the AI never publishes
-    version: 1,
-    title: result.draft.title,
-    paragraphs: result.draft.paragraphs.map((p) => ({ text: p.text, source_tribute_ids: p.source_tribute_ids.map((id) => new ObjectId(id)) })),
-    flags: result.draft.flags.map((f) => ({ ...f, source_tribute_ids: f.source_tribute_ids.map((id) => new ObjectId(id)) })),
-    input_tribute_ids: sources.map((s) => new ObjectId(s.id)),
-    model_id: result.modelId.slice(0, 120),
-    provider_label: result.providerLabel.slice(0, 120),
-    edited_by_organizer: false,
-    created_at: created,
-    updated_at: created,
-    published_at: null,
+  const job: WeaveJobDoc = {
+    id: new ObjectId(),
+    status: "running",
+    started_at: now,
+    deadline: new Date(now.getTime() + WEAVE_JOB_MS),
+    finished_at: null,
+    story_id: null,
+    error_code: null,
   };
-  await c.stories.insertOne(story);
-  console.info(
-    JSON.stringify({
-      event: "weave_ok",
-      request_id: ctx.requestId,
-      model: story.model_id,
-      latency_ms: result.latencyMs,
-      attempts: result.attempts,
-      tributes: sources.length,
-      paragraphs: story.paragraphs.length,
-      flags: story.flags.length,
-    }),
+  // Atomic: only start when no live job is running.
+  const started = await c.memorials.findOneAndUpdate(
+    {
+      _id: mid,
+      $or: [{ weave_job: { $exists: false } }, { weave_job: null }, { "weave_job.status": { $ne: "running" } }, { "weave_job.deadline": { $lte: now } }],
+    },
+    { $set: { weave_job: job } },
   );
-  const body: WeaveResponse = { story: toStoryView(story) };
-  return { status: 201, body };
+  if (!started) throw new HttpError("WEAVE_IN_PROGRESS");
+
+  (ctx.deps.background ?? runInBackground)(() => runWeaveJob(c, ctx.deps, client, auth.memorial, sources, job.id, ctx.requestId));
+  const body: WeaveStartResponse = { job: toJobView(job) };
+  return { status: 202, body };
+};
+
+/** GET weave: latest job for this memorial and, once it succeeded, its draft. */
+export const weaveStatus: Handler = async (ctx) => {
+  const c = collections(await ctx.deps.db());
+  const auth = await requireOrganizer(ctx, c);
+  assertMemorialScope(auth, ctx.params.id);
+  const job = effectiveJob(auth.memorial.weave_job, ctx.deps.now());
+  const story = job?.status === "succeeded" && job.story_id ? await c.stories.findOne({ _id: job.story_id, memorial_id: auth.memorial._id }) : null;
+  const body: WeaveStatusResponse = {
+    job: job && (job.status !== "succeeded" || story) ? toJobView(job) : null,
+    story: story ? toStoryView(story) : null,
+  };
+  return { status: 200, body };
 };
 
 /** Every cited id must be a currently approved tribute of this memorial. */

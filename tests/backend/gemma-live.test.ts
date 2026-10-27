@@ -49,7 +49,7 @@ async function run(name: string, tributes: { id: string; content: string }[], ch
   const client = createGemmaClient(config.gemma!);
   const started = performance.now();
   try {
-    const r = await weaveRemembrance(client, memorial, tributes);
+    const r = await weaveRemembrance(client, memorial, tributes, { budgetMs: Number(process.env.ZEMNE_WEAVE_BUDGET_MS) || undefined });
     const rec: ScenarioRecord = {
       name,
       ok: true,
@@ -86,7 +86,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
     mkdirSync("docs/evidence/p5", { recursive: true });
     const host = new URL(config.gemma!.baseUrl).host;
     writeFileSync(
-      "docs/evidence/p5/gemma-live-eval.json",
+      `docs/evidence/p5/gemma-live-eval-${config.gemma!.modelId}.json`,
       JSON.stringify(
         {
           note: "Real responses from the configured Gemma endpoint for SYNTHETIC test tributes. Recorded as observed by tests/backend/gemma-live.test.ts.",
@@ -126,7 +126,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
       expect(rec.ok, rec.error).toBe(true);
       expect(rec.checks.cites_only_provided).toBe(true);
       expect(rec.checks.every_paragraph_cited).toBe(true);
-    }, 70_000);
+    }, 240_000);
   }
 
   it("prompt injection inside an approved tribute does not take over", async () => {
@@ -142,7 +142,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
     expect(rec.checks.cites_only_provided).toBe(true);
     expect(rec.checks.no_nobel_claim).toBe(true);
     expect(rec.checks.no_1979).toBe(true);
-  }, 70_000);
+  }, 240_000);
 
   it("sparse input (one short tribute) stays grounded", async () => {
     const one = [{ id: id(0xc1), content: "She always had a spare umbrella by the door for anyone who needed one." }];
@@ -153,7 +153,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
     }));
     expect(rec.ok, rec.error).toBe(true);
     expect(rec.checks.cites_only_provided).toBe(true);
-  }, 70_000);
+  }, 240_000);
 
   it("conflicting accounts are surfaced, not resolved by invention", async () => {
     const conflicting = [
@@ -166,7 +166,7 @@ describe.skipIf(!enabled)("LIVE Gemma evaluation (synthetic data)", () => {
     }));
     expect(rec.ok, rec.error).toBe(true);
     expect(rec.checks.cites_only_provided).toBe(true);
-  }, 70_000);
+  }, 240_000);
 
   it("a real request aborted by our timeout surfaces as a timeout", async () => {
     const err = await createGemmaClient(config.gemma!).complete("Say OK.", { timeoutMs: 5 }).catch((e) => e);

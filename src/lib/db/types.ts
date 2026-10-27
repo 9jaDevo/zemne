@@ -26,8 +26,19 @@ export interface MemorialDoc {
   visibility: "unlisted";
   created_at: Date;
   updated_at: Date;
-  /** Set while a weave is running; prevents concurrent weaves (expires on its own). */
-  weave_lock_until?: Date | null;
+  /** Latest weave job. A `running` job whose deadline has not passed is the in-flight lock. */
+  weave_job?: WeaveJobDoc | null;
+}
+
+export interface WeaveJobDoc {
+  id: ObjectId;
+  status: "running" | "succeeded" | "failed";
+  started_at: Date;
+  /** After this, a still-`running` job is treated as failed (AI_TIMEOUT), e.g. after a restart. */
+  deadline: Date;
+  finished_at: Date | null;
+  story_id: ObjectId | null;
+  error_code: "AI_INVALID_OUTPUT" | "AI_UNAVAILABLE" | "AI_TIMEOUT" | "INTERNAL" | null;
 }
 
 interface ContributionBase {

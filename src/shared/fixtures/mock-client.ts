@@ -29,6 +29,7 @@ import {
   type OrganizerSession,
   type StoryView,
   type WeaveFlag,
+  type WeaveJob,
   type ZemneApiClient,
 } from "../api";
 import {
@@ -67,6 +68,8 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
   let session: OrganizerSession | null = null;
   let pendingError: ErrorCode | null = null;
   let counter = 0;
+  /** Latest DEMO weave job per memorial, for getWeaveStatus(). */
+  let jobs = new Map<string, WeaveJob>();
 
   const iso = () => now().toISOString();
   const newId = () => "6de0" + (++counter).toString(16).padStart(20, "0");
@@ -82,6 +85,7 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
   function seed() {
     const demo = createDemoState();
     memorials = new Map([[demo.memorial.id, demo]]);
+    jobs = new Map();
     session = options.startWithDemoSession ? newSession(demo.memorial.id) : null;
     pendingError = null;
   }
@@ -334,8 +338,17 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
         };
         state.stories.unshift(story);
         state.stories = state.stories.slice(0, LIMITS.organizerStoryCap);
+        jobs.set(memorialId, { id: newId(), status: "succeeded", started_at: ts, finished_at: ts, story_id: story.id, error: null });
         return { story };
       }, weaveLatency),
+
+    getWeaveStatus: (memorialId) =>
+      call(() => {
+        const state = owned(memorialId);
+        const job = jobs.get(memorialId) ?? null;
+        const story = job?.story_id ? (state.stories.find((s) => s.id === job.story_id) ?? null) : null;
+        return { job: story ? job : null, story };
+      }),
 
     updateStory: (storyId, input) =>
       call(() => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { StoryParagraphSchema, WeaveFlagSchema } from "../../src/shared/api";
 import { demoPersonas } from "../../src/shared/fixtures";
-import { GemmaError, createGemmaClient, providerLabelFor } from "../../src/lib/ai/gemma-client";
+import { GemmaError, createGemmaClient, providerLabelFor, stripReasoning } from "../../src/lib/ai/gemma-client";
 import { groundingFlags } from "../../src/lib/ai/grounding";
 import { buildWeavePrompt } from "../../src/lib/ai/prompt";
 import { WeaveError, weaveRemembrance } from "../../src/lib/ai/weaver";
@@ -103,7 +103,14 @@ describe("weaveRemembrance pipeline", () => {
 
   it("maps timeouts and outages to AI_TIMEOUT / AI_UNAVAILABLE with no output", async () => {
     await expect(weaveRemembrance(scriptedGemma([new GemmaError("timeout")]), memorial, tributes)).rejects.toMatchObject({ code: "AI_TIMEOUT" });
-    await expect(weaveRemembrance(scriptedGemma([new GemmaError("unavailable", 429)]), memorial, tributes)).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:429" });
+    // Overload (429/5xx) gets exactly one retry; a second overload fails.
+    const overloaded = scriptedGemma([new GemmaError("unavailable", 429), new GemmaError("unavailable", 503)]);
+    await expect(weaveRemembrance(overloaded, memorial, tributes, { retryDelayMs: 0 })).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:503" });
+    expect(overloaded.prompts).toHaveLength(2);
+    // Auth/config errors are not retried.
+    const badKey = scriptedGemma([new GemmaError("unavailable", 401)]);
+    await expect(weaveRemembrance(badKey, memorial, tributes, { retryDelayMs: 0 })).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:401" });
+    expect(badKey.prompts).toHaveLength(1);
     let t = 0;
     await expect(weaveRemembrance(scriptedGemma([good]), memorial, tributes, { budgetMs: 1000, now: () => (t += 0) })).rejects.toBeInstanceOf(WeaveError);
   });
@@ -171,6 +178,14 @@ describe("OpenAI-compatible Gemma client", () => {
     const err = await createGemmaClient(config, slow).complete("x", { timeoutMs: 150 }).catch((e) => e);
     expect(err).toMatchObject({ kind: "timeout" });
     expect(Date.now() - started).toBeLessThan(2000);
+  });
+
+  it("strips Gemma 4 inline reasoning and treats a cut-off thought as no answer", async () => {
+    const reply = (content: string) => ok({ model: "gemma-4-31b-it", choices: [{ message: { content } }] });
+    const client = (content: string) => createGemmaClient(config, reply(content) as unknown as typeof fetch).complete("x", { timeoutMs: 1000 });
+    expect((await client('<thought>Plan the JSON.\nCheck ids.</thought>\n{"title":"t"}')).text).toBe('{"title":"t"}');
+    expect(await client("<thought>The user wants...").catch((e) => e)).toMatchObject({ kind: "invalid_output" });
+    expect(stripReasoning("<think>a</think> b <thought>c</thought>")).toBe("b");
   });
 
   it("labels providers by host", () => {

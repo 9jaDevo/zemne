@@ -3,9 +3,9 @@
  * Gemma model (Google AI Studio's Gemini API compatibility layer, Hugging Face
  * router, OpenRouter, Ollama, ...).
  *
- * Gemma on the Gemini API rejects system instructions and JSON response mode,
- * so the whole prompt goes in one user message and JSON is enforced by our
- * own validator instead. Never logs prompts, outputs, keys or raw errors.
+ * Gemma on the Gemini API rejects system instructions, JSON response mode and
+ * thinking controls, so the whole prompt goes in one user message, inline
+ * reasoning is stripped, and JSON is enforced by our own validator. Never logs prompts, outputs, keys or raw errors.
  */
 import type { GemmaConfig } from "../../server/config";
 
@@ -50,12 +50,22 @@ export function providerLabelFor(baseUrl: string): string {
   return host;
 }
 
+/**
+ * Gemma 4 on the Gemini API returns its reasoning inline as <thought>...</thought>
+ * and does not accept thinking controls. Keep only the answer; an unterminated
+ * thought (output cut off mid-reasoning) yields no answer.
+ */
+export function stripReasoning(content: string): string {
+  const withoutClosed = content.replace(/<(thought|think)>[\s\S]*?<\/\1>/gi, "");
+  return /<(thought|think)>/i.test(withoutClosed) ? "" : withoutClosed.trim();
+}
+
 export function createGemmaClient(config: GemmaConfig, fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis)): GemmaClient {
   const url = `${config.baseUrl}/chat/completions`;
   return {
     modelId: config.modelId,
     providerLabel: providerLabelFor(config.baseUrl),
-    async complete(prompt, { timeoutMs, maxTokens = 1400 }) {
+    async complete(prompt, { timeoutMs, maxTokens = 6144 }) {
       const started = performance.now();
       let res: Response;
       try {
@@ -89,8 +99,9 @@ export function createGemmaClient(config: GemmaConfig, fetchImpl: typeof fetch =
         throw new GemmaError(name === "TimeoutError" || name === "AbortError" ? "timeout" : "invalid_output", res.status);
       }
       const body = payload as { model?: unknown; choices?: { message?: { content?: unknown } }[] };
-      const text = body.choices?.[0]?.message?.content;
-      if (typeof text !== "string" || !text.trim()) throw new GemmaError("invalid_output", res.status);
+      const raw = body.choices?.[0]?.message?.content;
+      const text = typeof raw === "string" ? stripReasoning(raw) : "";
+      if (!text) throw new GemmaError("invalid_output", res.status);
       return {
         text,
         modelId: typeof body.model === "string" && body.model.trim() ? body.model.trim().replace(/^models\//, "") : config.modelId,

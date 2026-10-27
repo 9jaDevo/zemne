@@ -57,6 +57,8 @@ describe("DEMO mock client follows the contract", () => {
     expect(console1.counts.tributes.pending).toBe(3);
     for (const t of console1.tributes) await client.moderateTribute(t.id, { status: "approved" });
     const { story } = WeaveResponseSchema.parse(await client.weaveStory(created.memorial_id));
+    const weaveState = await client.getWeaveStatus(created.memorial_id);
+    expect(weaveState).toMatchObject({ job: { status: "succeeded", story_id: story.id }, story: { id: story.id } });
     expect(story.status).toBe("draft");
     expect(story.ai.model_id).toMatch(/DEMO/);
     expect(story.input_tribute_ids).toHaveLength(3);

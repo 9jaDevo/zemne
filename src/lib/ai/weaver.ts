@@ -23,6 +23,15 @@ export interface WeaveResult {
   attempts: number;
 }
 
+/**
+ * Whole-weave budget across attempts. Measured gemma-4-31b-it latency on
+ * Google AI Studio was 61–152 s per call (tracker P5), so weave runs as a
+ * background job with this budget rather than inside one HTTP request.
+ */
+export const WEAVE_BUDGET_MS = 170_000;
+/** Upstream statuses worth one short retry (overload, transient server errors). */
+const TRANSIENT = new Set([429, 500, 502, 503]);
+
 export type WeaveFailure = "AI_INVALID_OUTPUT" | "AI_UNAVAILABLE" | "AI_TIMEOUT";
 
 export class WeaveError extends Error {
@@ -36,8 +45,10 @@ export class WeaveError extends Error {
 }
 
 export interface WeaveOptions {
-  /** Whole-call budget across attempts (contract: ~60 s). */
+  /** Whole-call budget across attempts. Default WEAVE_BUDGET_MS. */
   budgetMs?: number;
+  /** Wait before the single overload retry. Default 3000 ms. */
+  retryDelayMs?: number;
   now?: () => number;
 }
 
@@ -48,13 +59,14 @@ export async function weaveRemembrance(
   opts: WeaveOptions = {},
 ): Promise<WeaveResult> {
   const now = opts.now ?? (() => performance.now());
-  const deadline = now() + (opts.budgetMs ?? 55_000);
+  const deadline = now() + (opts.budgetMs ?? WEAVE_BUDGET_MS);
   const { input, aliasToId } = prepareWeaveInput(memorial, approvedTributes);
   const prompt = buildWeavePrompt(input);
   const byId = new Map(approvedTributes.map((t) => [t.id, t.content]));
 
   let latencyMs = 0;
   let lastReason = "no attempt";
+  let transientRetried = false;
   for (let attempt = 1; attempt <= 2; attempt++) {
     const remaining = deadline - now();
     if (remaining < 2_000) {
@@ -68,6 +80,12 @@ export async function weaveRemembrance(
       if (error instanceof GemmaError) {
         if (error.kind === "invalid_output") {
           lastReason = "empty or malformed response envelope";
+          continue;
+        }
+        if (error.kind === "unavailable" && !transientRetried && TRANSIENT.has(error.upstreamStatus ?? 0) && deadline - now() > 60_000) {
+          transientRetried = true;
+          await new Promise((r) => setTimeout(r, opts.retryDelayMs ?? 3_000));
+          attempt--; // an overload retry does not use up the repair attempt
           continue;
         }
         throw new WeaveError(error.kind === "timeout" ? "AI_TIMEOUT" : "AI_UNAVAILABLE", `${error.kind}:${error.upstreamStatus ?? "-"}`);

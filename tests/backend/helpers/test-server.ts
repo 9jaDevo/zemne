@@ -42,12 +42,17 @@ export async function startTestServer() {
   const db: Db = client.db("zemne_test");
   await ensureDatabase(db);
   let now = new Date(START);
+  /** Background jobs started by handlers; tests await them with flush(). */
+  const pending: Promise<void>[] = [];
 
   const deps: ServerDeps = {
     config: { mongodbUri: "mongodb://test", sessionSecret: TEST_SECRET, production: true, gemmaConfigured: false, gemma: null },
     db: async () => db,
     now: () => new Date(now),
     gemma: null,
+    background: (task) => {
+      pending.push(task());
+    },
   };
 
   async function call(handler: Handler, opts: CallOptions = {}): Promise<CallResult> {
@@ -88,7 +93,12 @@ export async function startTestServer() {
     advance: (ms: number) => {
       now = new Date(now.getTime() + ms);
     },
+    /** Waits for every background job started so far. */
+    async flush() {
+      while (pending.length) await pending.shift();
+    },
     async reset() {
+      while (pending.length) await pending.shift()!.catch(() => undefined);
       now = new Date(START);
       deps.gemma = null;
       await Promise.all(Object.values(COLLECTIONS).map((name) => db.collection(name).deleteMany({})));
