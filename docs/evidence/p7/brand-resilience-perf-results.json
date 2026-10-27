@@ -1,0 +1,133 @@
+{
+  "testSuite": "Brand Identity, Network Resilience & Performance Profiling",
+  "targetUrl": "https://zemne-preview.onrender.com",
+  "startTime": "2026-10-27T17:36:48.705Z",
+  "brandAssets": [
+    {
+      "name": "Asset Check: /brand/zemne-logo-primary.svg",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:49.474Z",
+      "path": "/brand/zemne-logo-primary.svg",
+      "description": "Primary vector logo",
+      "httpStatus": 200,
+      "byteLength": 567,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "name": "Asset Check: /brand/zemne-mark.svg",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:49.711Z",
+      "path": "/brand/zemne-mark.svg",
+      "description": "Original icon/monogram mark",
+      "httpStatus": 200,
+      "byteLength": 146,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "name": "Asset Check: /brand/zemne-logo-light.svg",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:49.948Z",
+      "path": "/brand/zemne-logo-light.svg",
+      "description": "Light mode logo lockup",
+      "httpStatus": 200,
+      "byteLength": 567,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "name": "Asset Check: /brand/zemne-logo-dark.svg",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:50.196Z",
+      "path": "/brand/zemne-logo-dark.svg",
+      "description": "Dark mode logo lockup",
+      "httpStatus": 200,
+      "byteLength": 567,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "name": "Asset Check: /favicon.svg",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:50.438Z",
+      "path": "/favicon.svg",
+      "description": "SVG Favicon",
+      "httpStatus": 200,
+      "byteLength": 261,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "name": "Asset Check: /favicon.ico",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:50.671Z",
+      "path": "/favicon.ico",
+      "description": "ICO Favicon (32x32)",
+      "httpStatus": 200,
+      "byteLength": 503,
+      "contentType": "image/x-icon"
+    },
+    {
+      "name": "Asset Check: /brand/icon-180.png",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:51.130Z",
+      "path": "/brand/icon-180.png",
+      "description": "Apple touch icon (180x180)",
+      "httpStatus": 200,
+      "byteLength": 2663,
+      "contentType": "image/png"
+    },
+    {
+      "name": "Asset Check: /brand/icon-192.png",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:51.474Z",
+      "path": "/brand/icon-192.png",
+      "description": "PWA icon (192x192)",
+      "httpStatus": 200,
+      "byteLength": 2803,
+      "contentType": "image/png"
+    },
+    {
+      "name": "Asset Check: /brand/icon-512.png",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:51.711Z",
+      "path": "/brand/icon-512.png",
+      "description": "PWA icon (512x512)",
+      "httpStatus": 200,
+      "byteLength": 11638,
+      "contentType": "image/png"
+    },
+    {
+      "name": "Asset Check: /manifest.webmanifest",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:51.935Z",
+      "path": "/manifest.webmanifest",
+      "description": "Web App Manifest",
+      "httpStatus": 200,
+      "byteLength": 398,
+      "contentType": "application/manifest+json"
+    }
+  ],
+  "networkResilience": [
+    {
+      "name": "Offline Submission Error Resilience",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:36:54.852Z",
+      "errorMessageShown": "Something needs your attention\n\nWe couldn't reach ZEMNE. Check your connection and try again.",
+      "screenshot": "resilience-offline-error.png",
+      "crashPrevented": true
+    }
+  ],
+  "performanceMetrics": {
+    "route": "/",
+    "status": 200,
+    "clientTotalLoadMs": 2444,
+    "ttfbMs": 270,
+    "domInteractiveMs": 865,
+    "domContentLoadedMs": 865,
+    "loadCompleteMs": 1327,
+    "resourceCount": 14,
+    "totalTransferredBytes": 397017,
+    "jsTransferBytes": 381917,
+    "cssTransferBytes": 12341,
+    "imageTransferBytes": 0,
+    "domNodeCount": 118
+  },
+  "endTime": "2026-10-27T17:36:57.785Z"
+}

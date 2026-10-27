@@ -1,0 +1,256 @@
+{
+  "testSuite": "Hotspots, Viewports, Touch Targets, 2D Fallback & Accessibility",
+  "targetUrl": "https://zemne-preview.onrender.com/m/mira-vale-synthetic-p6-rehearsal-kkr2i9",
+  "startTime": "2026-10-27T17:34:16.506Z",
+  "checks": [
+    {
+      "name": "Hotspot Raycast Click: guestbook",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:32.956Z",
+      "markerCoordinates": [
+        -2.8,
+        2.05,
+        1.1
+      ],
+      "screenCoordinates": [
+        303.62731915863213,
+        561.6947339533664
+      ]
+    },
+    {
+      "name": "Hotspot Raycast Click: tribute",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:41.199Z",
+      "markerCoordinates": [
+        2.9,
+        2.05,
+        -0.6
+      ],
+      "screenCoordinates": [
+        599.6114788894354,
+        590.3417076974049
+      ]
+    },
+    {
+      "name": "Hotspot Raycast Click: wall",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:46.443Z",
+      "markerCoordinates": [
+        2.9,
+        3.5,
+        -4.98
+      ],
+      "screenCoordinates": [
+        688.1268473027877,
+        468.2078796614742
+      ]
+    },
+    {
+      "name": "Horizontal Overflow Check: mobile-375",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:53.839Z",
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "hasOverflow": false
+    },
+    {
+      "name": "Touch Target Size Audit: mobile-375",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:53.842Z",
+      "totalButtons": 9,
+      "undersizedCount": 0,
+      "undersizedList": []
+    },
+    {
+      "name": "Mobile Single-Thumb Navigation: mobile-375",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:34:58.280Z",
+      "navBoundingBox": {
+        "x": 16,
+        "y": 615.6875,
+        "width": 343,
+        "height": 81
+      }
+    },
+    {
+      "name": "Horizontal Overflow Check: mobile-390",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:03.160Z",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "hasOverflow": false
+    },
+    {
+      "name": "Touch Target Size Audit: mobile-390",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:03.163Z",
+      "totalButtons": 9,
+      "undersizedCount": 0,
+      "undersizedList": []
+    },
+    {
+      "name": "Mobile Single-Thumb Navigation: mobile-390",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:07.659Z",
+      "navBoundingBox": {
+        "x": 16,
+        "y": 615.6875,
+        "width": 358,
+        "height": 81
+      }
+    },
+    {
+      "name": "Horizontal Overflow Check: tablet-768",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:13.479Z",
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "hasOverflow": false
+    },
+    {
+      "name": "Touch Target Size Audit: tablet-768",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:13.482Z",
+      "totalButtons": 9,
+      "undersizedCount": 0,
+      "undersizedList": []
+    },
+    {
+      "name": "Mobile Single-Thumb Navigation: tablet-768",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:20.058Z",
+      "navBoundingBox": {
+        "x": 25,
+        "y": 858.75,
+        "width": 407.984375,
+        "height": 88
+      }
+    },
+    {
+      "name": "Horizontal Overflow Check: desktop-1440",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:24.946Z",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "hasOverflow": false
+    },
+    {
+      "name": "Touch Target Size Audit: desktop-1440",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:24.948Z",
+      "totalButtons": 9,
+      "undersizedCount": 0,
+      "undersizedList": []
+    },
+    {
+      "name": "2D Mode Toggle & URL Parameter (?mode=2d)",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:32.744Z",
+      "toggledBackTo3D": true
+    },
+    {
+      "name": "Reduced Motion Compliance",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:41.770Z",
+      "prefersReducedMotion": "reduce",
+      "cameraTransition": "instant"
+    },
+    {
+      "name": "WebGL Context Loss Fallback",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:54.725Z",
+      "fallbackDisplayed": true,
+      "noticeText": "The 3D hall is unavailable on this device."
+    },
+    {
+      "name": "Keyboard Navigation & Focus Indicators",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:35:58.449Z",
+      "focusedElementTag": "BUTTON"
+    }
+  ],
+  "viewports": {},
+  "artifacts": [
+    {
+      "filename": "vp-01-desktop-overview.png",
+      "description": "3D hall desktop overview at 1440px",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-01-desktop-overview.png"
+    },
+    {
+      "filename": "vp-02-hotspot-guestbook.png",
+      "description": "Opened destination panel: guestbook",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-02-hotspot-guestbook.png"
+    },
+    {
+      "filename": "vp-02-hotspot-tribute.png",
+      "description": "Opened destination panel: tribute",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-02-hotspot-tribute.png"
+    },
+    {
+      "filename": "vp-02-hotspot-wall.png",
+      "description": "Opened destination panel: wall",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-02-hotspot-wall.png"
+    },
+    {
+      "filename": "vp-audit-mobile-375.png",
+      "description": "Hall at iPhone SE (375px)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-audit-mobile-375.png"
+    },
+    {
+      "filename": "vp-mobile-nav-tapped-mobile-375.png",
+      "description": "Mobile navigation tapped through destinations at mobile-375",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-mobile-nav-tapped-mobile-375.png"
+    },
+    {
+      "filename": "vp-audit-mobile-390.png",
+      "description": "Hall at iPhone 12/13/14 (390px)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-audit-mobile-390.png"
+    },
+    {
+      "filename": "vp-mobile-nav-tapped-mobile-390.png",
+      "description": "Mobile navigation tapped through destinations at mobile-390",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-mobile-nav-tapped-mobile-390.png"
+    },
+    {
+      "filename": "vp-audit-tablet-768.png",
+      "description": "Hall at iPad Portrait (768px)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-audit-tablet-768.png"
+    },
+    {
+      "filename": "vp-mobile-nav-tapped-tablet-768.png",
+      "description": "Mobile navigation tapped through destinations at tablet-768",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-mobile-nav-tapped-tablet-768.png"
+    },
+    {
+      "filename": "vp-audit-desktop-1440.png",
+      "description": "Hall at Desktop (1440px)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-audit-desktop-1440.png"
+    },
+    {
+      "filename": "vp-03-2d-mode-explicit.png",
+      "description": "Explicit 2D mode with neutral artwork placeholder",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-03-2d-mode-explicit.png"
+    },
+    {
+      "filename": "vp-04-2d-toggled-to-3d.png",
+      "description": "Toggled back to 3D hall",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-04-2d-toggled-to-3d.png"
+    },
+    {
+      "filename": "vp-05-reduced-motion-snap.png",
+      "description": "Camera view with prefers-reduced-motion: reduce",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-05-reduced-motion-snap.png"
+    },
+    {
+      "filename": "vp-06-webgl-context-lost-fallback.png",
+      "description": "Graceful fallback UI when WebGL context is lost",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-06-webgl-context-lost-fallback.png"
+    },
+    {
+      "filename": "vp-07-keyboard-focus-indicator.png",
+      "description": "Visible focus indicators during keyboard Tab navigation",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\vp-07-keyboard-focus-indicator.png"
+    }
+  ],
+  "endTime": "2026-10-27T17:35:58.449Z"
+}

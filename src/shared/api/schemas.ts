@@ -423,9 +423,44 @@ export const ModerateTributeResponseSchema = z.strictObject({
   }),
 });
 
+/** Result of a completed weave, as returned by ZemneApiClient.weaveStory(). */
 export const WeaveResponseSchema = z.strictObject({
   story: StoryViewSchema,
 });
+
+/**
+ * Weave runs as a background job (contract 1.2.0) because real Gemma 4 latency
+ * is ~1–3 minutes. POST starts it (202); GET on the same path reports it.
+ */
+export const WeaveJobSchema = z.strictObject({
+  id: ObjectIdSchema,
+  status: z.enum(["running", "succeeded", "failed"]),
+  started_at: TimestampSchema,
+  finished_at: TimestampSchema.nullable(),
+  /** Set when status is `succeeded`: the new draft. */
+  story_id: ObjectIdSchema.nullable(),
+  /** Set when status is `failed`; same shape as the error envelope's fields. */
+  error: z
+    .strictObject({
+      code: z.enum(["AI_INVALID_OUTPUT", "AI_UNAVAILABLE", "AI_TIMEOUT", "INTERNAL"]),
+      message: z.string().min(1).max(300),
+      retryable: z.boolean(),
+    })
+    .nullable(),
+});
+
+export const WeaveStartResponseSchema = z.strictObject({
+  job: WeaveJobSchema,
+});
+
+export const WeaveStatusResponseSchema = z
+  .strictObject({
+    /** The memorial's most recent weave job, or null if none has run. */
+    job: WeaveJobSchema.nullable(),
+    /** The draft the job produced, when the job succeeded. */
+    story: StoryViewSchema.nullable(),
+  })
+  .refine((v) => (v.job?.status === "succeeded") === (v.story !== null), "story is present exactly when the job succeeded");
 
 export const StoryUpdateResponseSchema = z.strictObject({
   story: StoryViewSchema,
@@ -490,6 +525,9 @@ export type OrganizerMemorialResponse = z.infer<typeof OrganizerMemorialResponse
 export type ModerateGuestbookResponse = z.infer<typeof ModerateGuestbookResponseSchema>;
 export type ModerateTributeResponse = z.infer<typeof ModerateTributeResponseSchema>;
 export type WeaveResponse = z.infer<typeof WeaveResponseSchema>;
+export type WeaveJob = z.infer<typeof WeaveJobSchema>;
+export type WeaveStartResponse = z.infer<typeof WeaveStartResponseSchema>;
+export type WeaveStatusResponse = z.infer<typeof WeaveStatusResponseSchema>;
 export type StoryUpdateResponse = z.infer<typeof StoryUpdateResponseSchema>;
 export type RotateTokenResponse = z.infer<typeof RotateTokenResponseSchema>;
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;

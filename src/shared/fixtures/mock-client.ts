@@ -29,6 +29,7 @@ import {
   type OrganizerSession,
   type StoryView,
   type WeaveFlag,
+  type WeaveJob,
   type ZemneApiClient,
 } from "../api";
 import {
@@ -67,6 +68,8 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
   let session: OrganizerSession | null = null;
   let pendingError: ErrorCode | null = null;
   let counter = 0;
+  /** Latest DEMO weave job per memorial, for getWeaveStatus(). */
+  let jobs = new Map<string, WeaveJob>();
 
   const iso = () => now().toISOString();
   const newId = () => "6de0" + (++counter).toString(16).padStart(20, "0");
@@ -82,6 +85,7 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
   function seed() {
     const demo = createDemoState();
     memorials = new Map([[demo.memorial.id, demo]]);
+    jobs = new Map();
     session = options.startWithDemoSession ? newSession(demo.memorial.id) : null;
     pendingError = null;
   }
@@ -109,10 +113,10 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
 
   const bySlug = (slug: string) => [...memorials.values()].find((m) => m.memorial.slug === slug) ?? fail("NOT_FOUND");
 
-  /** Mirrors server authorization: no session -> 401; other memorial -> 404 (no existence oracle). */
+  /** Mirrors server authorization: no session -> 401; session for another memorial -> 403. Items of other memorials -> 404. */
   function owned(memorialId: string): DemoMemorialState {
     if (!session || new Date(session.expires_at) <= now()) fail("UNAUTHENTICATED");
-    if (session!.memorial_id !== memorialId) fail("NOT_FOUND");
+    if (session!.memorial_id !== memorialId) fail("FORBIDDEN");
     return memorials.get(memorialId) ?? fail("NOT_FOUND");
   }
   const sessionState = () => owned(session?.memorial_id ?? "");
@@ -334,8 +338,17 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
         };
         state.stories.unshift(story);
         state.stories = state.stories.slice(0, LIMITS.organizerStoryCap);
+        jobs.set(memorialId, { id: newId(), status: "succeeded", started_at: ts, finished_at: ts, story_id: story.id, error: null });
         return { story };
       }, weaveLatency),
+
+    getWeaveStatus: (memorialId) =>
+      call(() => {
+        const state = owned(memorialId);
+        const job = jobs.get(memorialId) ?? null;
+        const story = job?.story_id ? (state.stories.find((s) => s.id === job.story_id) ?? null) : null;
+        return { job: story ? job : null, story };
+      }),
 
     updateStory: (storyId, input) =>
       call(() => {

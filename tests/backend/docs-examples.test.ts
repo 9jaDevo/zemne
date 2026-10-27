@@ -11,7 +11,11 @@ const SCHEMAS: Record<string, z.ZodType> = {
   CreateMemorialResponse: api.CreateMemorialResponseSchema,
   GuestbookSubmissionRequest: api.GuestbookSubmissionRequestSchema,
   HealthResponse: api.HealthResponseSchema,
+  ModerateGuestbookResponse: api.ModerateGuestbookResponseSchema,
   ModerateTributeResponse: api.ModerateTributeResponseSchema,
+  OrganizerMemorialResponse: api.OrganizerMemorialResponseSchema,
+  RotateTokenResponse: api.RotateTokenResponseSchema,
+  StoryUpdateResponse: api.StoryUpdateResponseSchema,
   ModerationRequest: api.ModerationRequestSchema,
   OrganizerSessionRequest: api.OrganizerSessionRequestSchema,
   OrganizerSessionResponse: api.OrganizerSessionResponseSchema,
@@ -20,6 +24,8 @@ const SCHEMAS: Record<string, z.ZodType> = {
   StoryView: api.StoryViewSchema,
   SubmissionReceiptResponse: api.SubmissionReceiptResponseSchema,
   TributeSubmissionRequest: api.TributeSubmissionRequestSchema,
+  WeaveStartResponse: api.WeaveStartResponseSchema,
+  WeaveStatusResponse: api.WeaveStatusResponseSchema,
 };
 
 const examples = [...doc.matchAll(/<!-- schema: (\w+) -->\s*```json\s*([\s\S]*?)```/g)].map((m) => ({ name: m[1], body: m[2] }));

@@ -1,0 +1,45 @@
+{
+  "testedCommit": "85a4f6af3fc6431b647eb28b4e083ad4def4d107",
+  "renderDeployment": "dep-dbgdc6gu01pc73fjpspg",
+  "capturedAt": "2026-10-27T16:52:21.436Z",
+  "health": {
+    "status": "ok",
+    "checks": {
+      "database": "ok",
+      "ai": "configured"
+    }
+  },
+  "publicUrl": "https://zemne-preview.onrender.com/m/mira-vale-synthetic-p6-rehearsal-kkr2i9",
+  "guestbook": 1,
+  "tributes": 3,
+  "storyIdUnchanged": true,
+  "titlePreserved": true,
+  "citationIdsPreserved": true,
+  "allSourcesApproved": true,
+  "publishedModel": "gemma-4-31b-it",
+  "cache": "private, no-store, max-age=0",
+  "sameTabRecovery": {
+    "fragmentCleared": true,
+    "consoleRecovered": true,
+    "publishedStoryPresent": true
+  },
+  "mobile390": {
+    "noHorizontalOverflow": true,
+    "privateTokenInRenderedText": false,
+    "keyboardDialogEscape": true
+  },
+  "realWebglMarkers": [
+    "guestbook: opens real form and approved entry",
+    "tribute: opens real API form",
+    "wall: genuine published/empty state"
+  ],
+  "pendingBeforeApproval": {
+    "guestbook": 0,
+    "tributes": 0,
+    "story": null
+  },
+  "afterApproval": {
+    "guestbook": 1,
+    "tributes": 3
+  }
+}

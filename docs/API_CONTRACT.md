@@ -1,11 +1,17 @@
 # ZEMNE — API Contract
 
-**Contract version:** `1.0.0` (P1, frozen for P2 UI work) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
+**Contract version:** `1.2.1` (P7 fixes) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
 **Authority:** `01_ZEMNE_MASTER_BLUEPRINT.md` §5–§8. This document turns that brief into exact routes, fields and rules.
 
 **Source of truth for types:** `src/shared/api/` (Zod schemas + TypeScript types). This document and those schemas must agree. `tests/backend/docs-examples.test.ts` checks every JSON example tagged `<!-- schema: X -->` below against schema `X`.
 
-> **Status in P1:** contract, types, fixtures and a DEMO mock client only. No route under `src/app/api` is implemented yet (that is P4/P5). Do not present mock responses as real.
+> **Status (P5):** every route in §5 is implemented in `src/app/api` and backed by MongoDB. Memory Weaver calls a real Gemma model, measured in §6.3. §10 lists endpoint readiness and responses captured from the real handlers.
+>
+> **1.2.1 changes (P7):** no API shape changes. The weave job budget rose from 170 s to 220 s and the job deadline from 180 s to 230 s. Upstream overload is retried up to 3 times (3 s / 8 s / 15 s backoff) instead of once. The HTTP client waits up to 300 s instead of 240 s. These respond to the production QA weave that produced no draft within 240 s.
+>
+> **1.2.0 changes:** weave is now a **background job**. `POST …/weave` returns `202` with a job instead of `201` with a story, and the new `GET …/weave` reports the job (§5.13). `ZemneApiClient.weaveStory()` keeps its signature by polling, so existing UI code is unaffected. New client method `getWeaveStatus()`.
+>
+> **1.1.0 changes:** new error code `FORBIDDEN` (403) for a valid session used on another memorial's memorial-addressed routes (§2.4). The organizer view caps each contribution list at 500. Unsupported HTTP methods get the framework's empty-body `405` (§7). Nothing was renamed or removed.
 
 ---
 
@@ -103,7 +109,8 @@ Set-Cookie: __Host-zemne_org=<value>; Path=/; Max-Age=43200; HttpOnly; Secure; S
 Every organizer route resolves the target memorial (directly, or through the entry/tribute/story's `memorial_id`) and requires it to equal the session's `mid`.
 
 - No cookie, bad signature, expired, or stale `tv` → `401 UNAUTHENTICATED`.
-- A valid session for a **different** memorial → `404 NOT_FOUND`, the same as a missing resource. Item ids are never confirmed to exist for non-owners.
+- A valid session for a **different** memorial on a route addressed by memorial id (`GET /api/organizer/memorials/:id`, `…/weave`, `…/rotate-token`) → `403 FORBIDDEN`.
+- An **item** (guestbook entry, tribute, story) that belongs to another memorial → `404 NOT_FOUND`, the same as a missing item. Item ids are never confirmed to exist for non-owners.
 - A wrong token and an unknown `memorial_id` on `POST /api/organizer/session` both return `401 INVALID_ORGANIZER_TOKEN`.
 
 ---
@@ -122,7 +129,7 @@ Writes with an empty body still send `{}` with JSON content-type: weave, rotate.
 
 ### 3.2 Rate limits
 
-Counters are fixed-window and keyed by `HMAC-SHA256(SESSION_SECRET, client_ip)`, truncated. **Raw IPs are never stored.** P4 stores them in a MongoDB `rate_limits` collection with a TTL index, so limits survive restarts and multiple instances. Client IP comes from the proxy-appended `X-Forwarded-For` hop on Render; P4 must verify Render's exact header behaviour and not trust client-supplied hops.
+Counters are fixed-window and keyed by `HMAC-SHA256(SESSION_SECRET, client_ip)`, truncated. **Raw IPs are never stored.** P4 stores them in a MongoDB `rate_limits` collection with a TTL index, so limits survive restarts and multiple instances. Client IP is taken from `CF-Connecting-IP` if present. Otherwise it is the **right-most** `X-Forwarded-For` hop, the one appended by the nearest proxy; left-most hops are client-spoofable. This header behaviour still has to be confirmed on the deployed Render service (tracker P4 open item). The per-memorial daily caps bound abuse either way.
 
 | Route | Limit |
 |---|---|
@@ -159,7 +166,18 @@ Public responses are built by **allowlist** serializers, never by spreading DB d
 | story: published one only, `id, title, paragraphs, edited_by_organizer, ai, published_at` | ✅ | ✅ all drafts + `flags`, `version`, `input_tribute_ids` |
 | weave `flags` | ❌ | ✅ |
 
-**Invariant:** every `source_tribute_id` in the public story refers to a tribute present in the same response's `tributes` array, so it is approved. `PublicMemorialResponseSchema` enforces this.
+**Invariant:** every `source_tribute_id` in the public story refers to a tribute present in the same response's `tributes` array, so it is approved. `PublicMemorialResponseSchema` enforces this. As a second layer, the server serializer drops any citation to a tribute that isn't publicly visible and omits a paragraph left uncited.
+
+### 3.5 Safe rendering (frontend obligations)
+
+The API escapes nothing and returns user text exactly as stored. It is plain text that has been normalized but not HTML-encoded. For example, `<script>alert(1)</script>` comes back as that literal string, and the tests check this. Safety therefore depends on how the UI renders it:
+
+1. Render user text and AI text only as React text children (`{entry.message}`). These escape automatically.
+2. Never pass API strings to `dangerouslySetInnerHTML`, `innerHTML`, Markdown or HTML renderers, `eval`, `href` or `src`. Never auto-link URLs.
+3. Preserve line breaks with CSS (`white-space: pre-line`), not by inserting `<br>`.
+4. Build links only from server-provided relative paths (`guest_path`, `manage_path`, `/m/<slug>`), combined with `location.origin`. Never build them from user text.
+5. Treat `moderation_hints` as advisory badges. Never auto-hide or auto-approve on them.
+6. API responses carry `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` and `Referrer-Policy: no-referrer`, so a JSON response can't be sniffed or framed as HTML.
 
 ---
 
@@ -218,7 +236,8 @@ Public responses are built by **allowlist** serializers, never by spreading DB d
 | 10 | `POST /api/organizer/memorials/:id/rotate-token` | cookie | 200 + new cookie |
 | 11 | `PATCH /api/organizer/guestbook/:id` | cookie | 200 |
 | 12 | `PATCH /api/organizer/tributes/:id` | cookie | 200 |
-| 13 | `POST /api/organizer/memorials/:id/weave` | cookie | 201 |
+| 13 | `POST /api/organizer/memorials/:id/weave` | cookie | 202 (job started) |
+| 13b | `GET /api/organizer/memorials/:id/weave` | cookie | 200 (job status) |
 | 14 | `PATCH /api/organizer/stories/:id` | cookie | 200 |
 
 Path builders are in `API_ROUTES` (`src/shared/api/routes.ts`). Client methods are in `ZemneApiClient` (`src/shared/api/client.ts`). Every route can also return `400 INVALID_JSON`, `400 VALIDATION_FAILED`, `405`, `413`, `415`, `403 ORIGIN_REJECTED` (writes), `429` and `500`. Only additional errors are listed below.
@@ -375,7 +394,7 @@ Response `200` (`OrganizerMemorialResponse`):
 - `published_story_id`.
 - `counts`: per-status counts for badges.
 
-A complete example is `demoOrganizerMemorialResponse` in `src/shared/fixtures/demo-memorial.ts`. Additional errors: `401 UNAUTHENTICATED`, `404 NOT_FOUND`.
+Each contribution list returns at most 500 items, newest first; `counts` are always exact. A complete fixture is `demoOrganizerMemorialResponse` in `src/shared/fixtures/demo-memorial.ts`, and a real captured response is in §10. Additional errors: `401 UNAUTHENTICATED`, `403 FORBIDDEN` (session for another memorial), and `404 NOT_FOUND` for a malformed id.
 
 `StoryView`:
 
@@ -404,7 +423,7 @@ A complete example is `demoOrganizerMemorialResponse` in `src/shared/fixtures/de
 ```
 
 ### 5.10 `POST /api/organizer/memorials/:id/rotate-token`
-Request body: `{}`. The response `200` (`RotateTokenResponse`) contains `manage_path`, `organizer_token` and `session`, and sets a new cookie. The old link and all old sessions stop working immediately. Show the same "SAVE THIS PRIVATE LINK" handoff as on create.
+Request body: `{}`. The response `200` (`RotateTokenResponse`) contains `manage_path`, `organizer_token` and `session`, and sets a new cookie. The old link and all old sessions stop working immediately. Show the same "SAVE THIS PRIVATE LINK" handoff as on create. Additional errors: `401`, `403 FORBIDDEN`, and `429` (5 per hour).
 
 ### 5.11 `PATCH /api/organizer/guestbook/:id` and 5.12 `PATCH /api/organizer/tributes/:id` — moderate
 
@@ -435,19 +454,71 @@ Request body: `{}`. The response `200` (`RotateTokenResponse`) contains `manage_
 
 Additional errors: `401`, `404` (unknown id, or one belonging to another memorial). Requesting `status: "pending"` is a `400 VALIDATION_FAILED`.
 
-### 5.13 `POST /api/organizer/memorials/:id/weave` — Gemma Memory Weaver
+### 5.13 `POST` and `GET /api/organizer/memorials/:id/weave` — Gemma Memory Weaver (background job)
 
-Request body: `{}` (`WeaveRequest`; no options). The server collects **every currently approved tribute** of this memorial. Client-supplied tribute ids are not accepted. The server runs the model and the validator (§6) and stores a new `draft`.
+Real Gemma 4 latency on the configured provider is about **1–3 minutes**, and up to about 4 minutes with overload retries (§6.3), so weave runs as a **background job** rather than inside one HTTP request. This changed in 1.2.0.
 
-- Response `201` (`WeaveResponse`): `{ "story": StoryView }` with `status: "draft"`, `version: 1`.
-- It runs synchronously with a server timeout of about 60 s. The UI must show a long-running state ("Weaving approved tributes…") and must not double-submit.
-- Additional errors:
-  - `409 NO_APPROVED_TRIBUTES`
-  - `409 WEAVE_IN_PROGRESS`
-  - `502 AI_INVALID_OUTPUT`: the model output was malformed or no paragraph cited a provided tribute, even after one internal retry.
-  - `503 AI_UNAVAILABLE`
-  - `504 AI_TIMEOUT`
-  - On every AI error, **nothing is stored and no fallback or fake text is produced**. `retryable: true`.
+**`POST` — start a weave.** Request body: `{}` (`WeaveRequest`; no options).
+- The server collects **every currently approved tribute** of this memorial, oldest first, up to 40 tributes or 40,000 characters. Client-supplied tribute ids are not accepted.
+- It starts a job and returns **`202`** (`WeaveStartResponse`) immediately.
+- The job runs the model and the validator (§6) and stores a new **`draft`**. It never publishes.
+
+<!-- schema: WeaveStartResponse -->
+```json
+{
+  "job": {
+    "id": "65d0000000000000000000e1",
+    "status": "running",
+    "started_at": "2026-10-27T12:00:00.000Z",
+    "finished_at": null,
+    "story_id": null,
+    "error": null
+  }
+}
+```
+
+Synchronous errors from `POST`, where no job is started:
+- `401 UNAUTHENTICATED`, `403 FORBIDDEN` (session for another memorial), `403 ORIGIN_REJECTED`, `429 RATE_LIMITED` (6 per hour per memorial).
+- `409 NO_APPROVED_TRIBUTES`.
+- `409 WEAVE_IN_PROGRESS`: a job for this memorial is still running. Only one runs at a time.
+- `503 AI_UNAVAILABLE`: no Gemma endpoint is configured on the server.
+
+**`GET` — job status.** Returns `200` (`WeaveStatusResponse`) with the memorial's **latest** job, or `null` if none has run. `story` is the produced draft, present exactly when `job.status` is `succeeded`. Auth is the same as `POST`: `401`, or `403 FORBIDDEN` for another memorial.
+
+<!-- schema: WeaveStatusResponse -->
+```json
+{
+  "job": {
+    "id": "65d0000000000000000000e1",
+    "status": "failed",
+    "started_at": "2026-10-27T12:00:00.000Z",
+    "finished_at": "2026-10-27T12:02:50.000Z",
+    "story_id": null,
+    "error": {
+      "code": "AI_TIMEOUT",
+      "message": "The AI took too long to respond. Nothing was saved. Please try again.",
+      "retryable": true
+    }
+  },
+  "story": null
+}
+```
+
+**Job outcomes:**
+- `running`
+- `succeeded`: `story_id` and `story` are set.
+- `failed`, with `error.code` one of:
+  - `AI_TIMEOUT`: the 220 s model budget ran out, or the job was orphaned by a server restart and passed its 230 s deadline.
+  - `AI_UNAVAILABLE`: provider error, or still overloaded after up to 3 retries.
+  - `AI_INVALID_OUTPUT`: unverifiable output after one repair attempt.
+  - `INTERNAL`.
+
+On every failure **nothing is stored and no fallback or fake text is produced**; all of these are `retryable: true`.
+
+**Client behaviour:**
+- `ZemneApiClient.weaveStory(memorialId)` keeps its 1.0 signature. The HTTP client POSTs, polls `GET` every 4 s (up to 300 s), and resolves `{ story }` or rejects with a `ZemneApiError` carrying the job's error code. **UI code written against the mock needs no change.**
+- New `getWeaveStatus(memorialId)` lets the console resume a "Weaving…" state after a reload.
+- The UI must show a long-running state, e.g. "Weaving approved tributes with Gemma. This can take 1–4 minutes." It must not double-submit; a second POST gets `409 WEAVE_IN_PROGRESS`.
 
 <!-- schema: ApiErrorBody -->
 ```json
@@ -493,7 +564,7 @@ The request is a discriminated union on `action`:
 
 ---
 
-## 6. Memory Weaver model contract (P5 implements; P1 freezes)
+## 6. Memory Weaver model contract (implemented in P5)
 
 Code: `src/shared/api/weave.ts`.
 
@@ -541,7 +612,52 @@ Code: `src/shared/api/weave.ts`.
 
 Passing validation means **the citations point at provided tributes. It does not mean the claims are verified.** The UI must never label AI text as "verified" or "fact-checked". Flags (`WeaveFlag`: `code`, `origin: model|validator`, `paragraph_index | null`, `message`, `source_tribute_ids`) are shown to the organizer only, beside the relevant paragraph.
 
-`StoryView.ai` records the real `model_id` (from `GEMMA_MODEL_ID`) and a provider label. P5 documents the exact model, version, provider, license, latency and evaluation results.
+`StoryView.ai` records the `model_id` **as reported by the endpoint's response** (for example `gemma-4-31b-it`) and a provider label derived from the endpoint host. Both are shown publicly next to a published story.
+
+### 6.1 Implementation (P5)
+
+- `src/lib/ai/gemma-client.ts`: an OpenAI-compatible `POST {GEMMA_API_BASE_URL}/chat/completions` client.
+  - The whole prompt goes in one user message. Gemma on the Gemini API rejects system instructions, JSON response mode and thinking controls; each was tried against the live endpoint.
+  - Gemma 4 returns its reasoning inline as `<thought>…</thought>`. The client strips it; an unterminated thought counts as no answer.
+  - `max_tokens` is 6144 and `temperature` is 0.3.
+- `src/lib/ai/prompt.ts`: rules come before the data and are repeated after it. Tributes are embedded as escaped JSON inside a per-request random boundary (`<<<DATA_<18 hex>` … `DATA_<18 hex>>>>`), so a tribute cannot close the block or pose as instructions. Contributor names are never sent.
+- `src/lib/ai/weaver.ts`: runs the model, then `validateWeaveOutput`, then one repair attempt if the output is unverifiable. On upstream 429/500/502/503 overload it retries up to 3 times (3 s, 8 s, 15 s backoff), but only while at least 60 s of budget would remain for the call. Overload retries don't use up the repair attempt. The budget is 220 s. `weave_ok` and `weave_failed` logs record the number of overload retries.
+- `src/lib/ai/grounding.ts`: deterministic validator flags (`origin: "validator"`). They mark numbers or years and capitalised names that don't appear in a paragraph's cited tributes or the memorial fields, and paragraphs that share under 20% of their content words with their sources. Text is never rewritten; the organizer decides.
+
+### 6.2 Model and provider (verified facts, 2026-10-27)
+
+| Item | Fact | How verified |
+|---|---|---|
+| Provider | Google AI Studio (Gemini API), OpenAI-compatible endpoint `https://generativelanguage.googleapis.com/v1beta/openai` | Live `GET /models` with the owner's key returned 200 |
+| Gemma models served | `gemma-4-31b-it` and `gemma-4-26b-a4b-it`, both version `001`. **Gemma 3 is not served:** `gemma-3-27b-it` returned 404 | Live `/models` (OpenAI-compatible and native endpoints) |
+| Model in use | `gemma-4-31b-it` (the dense Gemma 4 31B instruction-tuned model, 30.7B parameters) | `model` field of real responses |
+| Open weights and licence | `google/gemma-4-31B-it` on Hugging Face: open weights, **licence `apache-2.0`**, no gating notice | Model card, read 2026-10-27 |
+| Provider terms | The hosted API is subject to Google's Gemini API terms. **On the unpaid tier Google may use prompts and outputs to improve its products.** Evaluation used synthetic data only. Real memorials need a paid or billing-enabled key, or another host of the same open weights | Owner informed before the key was created |
+
+### 6.3 Measured behaviour (synthetic data; nothing fabricated)
+
+Evidence files are in `docs/evidence/p5/`. Every number below was observed on 2026-10-27 from this machine.
+
+| Run | Result |
+|---|---|
+| Probe: "Reply with exactly the word OK." | 200 in 30.2 s. Reasoning consumed the 20-token limit, which is why the client now allows 6144 tokens |
+| Live evaluation A (exploratory: 200 s budget, no overload retry). Its file was overwritten; numbers transcribed from that run's console output | Three personas: **61.0 s** OK, then 503, 503. Injection: **120.2 s** OK. Sparse: **66.9 s** OK. Conflicting: **152.1 s** OK |
+| Live evaluation B, production settings (`…31b-it-2026-10-27T16-16-14-224Z.json`) | Three personas: 503, 500, 500 (each after one retry). Injection: **129.2 s** OK. Sparse: 500. Conflicting: **112.0 s** OK |
+| End-to-end through the HTTP job API (`e2e-weave-…json`): production `next start`, local MongoDB, 3 synthetic contributors | `POST` 202 in 0.16 s. Job **succeeded at 64.7 s** (model 61.1 s, 1 attempt). The draft was not public; it was published by the organizer; all citations resolve |
+| Live evaluation C, after the P7 overload fix: 220 s budget, up to 3 overload retries (`…31b-it-2026-10-27T19-31-53-929Z.json`) | Three personas: **173.6 s** (97.5 s in the successful call), **37.3 s**, **46.1 s**, all OK. Injection and sparse: 500 after 3 retries. Conflicting: **216.9 s** OK (183.1 s in the successful call). Two successes took longer than the old 170 s budget, so they would have failed before the fix. The gap between end-to-end time and successful-call time is time spent in failed calls and backoff; the retry count itself isn't recorded in this file |
+| `gemma-4-26b-a4b-it` (`…26b-a4b-it-2026-10-27T16-01-44-661Z.json`) | 5 of 6 hit the 200 s timeout and 1 returned 500. Not usable today |
+
+Across completed `gemma-4-31b-it` weaves (7), model latency was **61.0–152.1 s**, median 112.0 s.
+
+Availability today was **7 successes out of 13** weave attempts. Every failure was an upstream 500/503 "high demand", and each failed safely as a retryable job error with nothing stored.
+
+Quality checks on every completed weave:
+- citations only to provided, approved tributes: 7/7;
+- prompt injection ignored, with no "Nobel" or "1979" in the output and the tribute flagged `possible_instruction_ignored`: 2/2;
+- conflicting accounts flagged and both accounts presented rather than resolved: 2/2;
+- sparse input flagged `insufficient_material` and kept to 1 paragraph: 1/1.
+
+Prose is accurate but plain. Organizer editing is expected.
 
 ---
 
@@ -581,9 +697,10 @@ Every non-2xx response body is `ApiErrorBody`:
 | `VALIDATION_FAILED` | 400 | no | Map `fields[].path` to form inputs (`fields` always present) |
 | `UNAUTHENTICATED` | 401 | no | "Session expired: open your private link again" |
 | `INVALID_ORGANIZER_TOKEN` | 401 | no | "This link isn't valid; check you copied all of it" |
+| `FORBIDDEN` | 403 | no | "This session is for a different memorial; open this memorial's private link" (new in 1.1.0) |
 | `ORIGIN_REJECTED` | 403 | no | Ask the user to reload |
 | `NOT_FOUND` | 404 | no | Memorial or item not found (also returned for items of other memorials) |
-| `METHOD_NOT_ALLOWED` | 405 | no | Bug |
+| `METHOD_NOT_ALLOWED` | 405 | no | Bug. Unsupported methods are answered by Next.js with an **empty-body 405**, not this envelope |
 | `INVALID_STATE_TRANSITION` | 409 | no | Refresh the console |
 | `VERSION_CONFLICT` | 409 | no | "Changed in another tab", then reload the story |
 | `NO_APPROVED_TRIBUTES` | 409 | no | Disable Weave until ≥1 tribute is approved |
@@ -601,19 +718,26 @@ Every non-2xx response body is `ApiErrorBody`:
 
 ---
 
-## 8. Persistence mapping (for P4)
+## 8. Persistence mapping (implemented in P4)
 
 Field names follow blueprint §6. API field names equal DB field names except `_id` → `id`.
 
 | Collection | Fields | Indexes |
 |---|---|---|
 | `memorials` | `_id, slug, name, birth_year?, death_year?, description, portrait_key?, owner_token_hash, owner_token_version, visibility:"unlisted", created_at, updated_at` | `slug` unique; `owner_token_hash` unique |
-| `guestbook_entries` | `_id, memorial_id, display_name, message, status, consent:true, moderation_hints[], ip_hash, created_at, moderated_at?` | `{memorial_id, status, created_at:-1}` |
-| `tributes` | `_id, memorial_id, contributor_name, relationship?, content, status, consent:true, moderation_hints[], ip_hash, created_at, moderated_at?` | `{memorial_id, status, created_at:-1}` |
+| `guestbook_entries` | `_id, memorial_id, display_name, message, status, consent:true, moderation_hints[], ip_hash, content_hash, created_at, moderated_at?` | `{memorial_id, status, created_at:-1}`; `{memorial_id, content_hash, created_at:-1}` |
+| `tributes` | `_id, memorial_id, contributor_name, relationship?, content, status, consent:true, moderation_hints[], ip_hash, content_hash, created_at, moderated_at?` | `{memorial_id, status, created_at:-1}`; `{memorial_id, content_hash, created_at:-1}` |
 | `story_drafts` | `_id, memorial_id, status, version, title, paragraphs[{text, source_tribute_ids[]}], flags[], input_tribute_ids[], model_id, provider_label, edited_by_organizer, created_at, updated_at, published_at?` | `{memorial_id, created_at:-1}`; partial unique `{memorial_id}` where `status:"published"` |
 | `rate_limits` | `_id (key), count, expires_at` | TTL on `expires_at` |
 
 The published story is found by querying `story_drafts` for `{memorial_id, status:"published"}`. The blueprint's `memorials.published_story?` is represented by that partial-unique query, not by a copied field. All writes validate with the request schemas, and status and source ids always come from the server.
+
+Implementation notes:
+- Code: `src/lib/db/{types,schema,client}.ts`.
+- When a collection is first created, it gets a MongoDB `$jsonSchema` validator (`validationLevel: strict`), so malformed documents are rejected even if application code is bypassed. Indexes are created idempotently on first connection. The app user's `readWrite@zemne` role is sufficient; no `collMod` is needed.
+- `ip_hash` is a keyed HMAC, truncated, never a raw IP. `content_hash` is the SHA-256 of case-folded text and powers the `duplicate_submission` hint over a 24 h window.
+- Tribute rejection with its story auto-unpublish, and publish with its supersede, each run in one transaction. Atlas supports this; the tests use a single-node replica set.
+- Remote URIs require validated TLS. The database name comes from the URI path and defaults to `zemne`.
 
 ---
 
@@ -640,14 +764,434 @@ The published story is found by querying `story_drafts` for `{memorial_id, statu
 - the cited-tribute auto-unpublish;
 - a single published story;
 - version conflicts;
-- 401/404 session rules;
+- 401/403/404 session rules;
 - the honeypot.
 
 Its `weaveStory` calls **no AI**. It returns hand-written paragraphs and placeholders labeled `[DEMO]`, with `ai.model_id: "DEMO-MOCK (no model called)"`. Options: `latencyMs`, `weaveLatencyMs`, `startWithDemoSession`, `now`. Helpers: `simulateNextError(code)` and `reset()`.
 
 ---
 
-## 10. Change control
+## 10. P4 implementation status and live response examples
+
+### 10.1 Endpoint readiness
+
+| Route | P4 status |
+|---|---|
+| `GET /api/health` | ✅ Real: DB ping plus config presence; secret values are never shown |
+| `POST /api/memorials` | ✅ MongoDB, hashed token, unique slug, cookie |
+| `GET /api/memorials/:slug` | ✅ Approved-only allowlist serializer |
+| `POST /api/memorials/:slug/guestbook`, `…/tributes` | ✅ Always `pending`, rate-limited, hints, honeypot |
+| `POST/GET/DELETE /api/organizer/session` | ✅ Fragment-token exchange → `__Host-zemne_org` cookie |
+| `GET /api/organizer/memorials/:id` | ✅ Owner view, counts, stories |
+| `POST /api/organizer/memorials/:id/rotate-token` | ✅ Revokes the old link and sessions |
+| `PATCH /api/organizer/guestbook/:id`, `…/tributes/:id` | ✅ Including the cited-tribute auto-unpublish |
+| `PATCH /api/organizer/stories/:id` | ✅ Edit, publish, unpublish, versioning, source checks. Before P5, stories only exist if inserted directly |
+| `POST`/`GET /api/organizer/memorials/:id/weave` | ✅ (P5) Background job on real `gemma-4-31b-it`; drafts only |
+
+Code layout:
+- `src/app/api/**/route.ts`: thin Node-runtime wrappers.
+- `src/server/handlers/{public,organizer}.ts`: request logic.
+- `src/server/security/*`: tokens, session, origin, IP, rate limits.
+- `src/server/serializers.ts`: public-safe output.
+- `src/server/auth.ts`: organizer authorization.
+
+Required env, backend only: `MONGODB_URI` and `SESSION_SECRET` (≥ 32 chars). If either is missing, routes return `500 INTERNAL` and `/api/health` reports `degraded`.
+
+### 10.2 Responses captured from the real handlers
+
+These were captured from the real handlers running against MongoDB (an in-memory replica set) with the synthetic personas. Ids and timestamps are what that run produced. Tokens are replaced with the fixture's fake token, and the cookie value is elided.
+
+`POST /api/memorials` → `201`, with header:
+
+```
+__Host-zemne_org=v1.<payload>.<signature>; Path=/; Max-Age=43200; HttpOnly; Secure; SameSite=Strict
+```
+
+<!-- schema: CreateMemorialResponse -->
+```json
+{
+  "memorial_id": "6ae0bb690d12c79223ec5c3e",
+  "memorial": {
+    "slug": "elowen-marsh-aprmkq",
+    "name": "Elowen Marsh",
+    "birth_year": 1941,
+    "death_year": 2025,
+    "description": "Gardener, choir alto and retired chemistry teacher.",
+    "portrait": {
+      "kind": "placeholder",
+      "key": "neutral-1"
+    },
+    "created_at": "2026-10-27T12:00:00.000Z"
+  },
+  "guest_path": "/m/elowen-marsh-aprmkq",
+  "manage_path": "/manage/6ae0bb690d12c79223ec5c3e#key=zmn_ot_DEMO-ONLY-not-a-real-secret-000000000000000",
+  "organizer_token": "zmn_ot_DEMO-ONLY-not-a-real-secret-000000000000000",
+  "session": {
+    "memorial_id": "6ae0bb690d12c79223ec5c3e",
+    "expires_at": "2026-10-28T00:00:00.000Z"
+  }
+}
+```
+
+`POST /api/memorials/:slug/tributes` → `202`:
+
+<!-- schema: SubmissionReceiptResponse -->
+```json
+{
+  "receipt": {
+    "id": "6ae0bb690d12c79223ec5c40",
+    "kind": "tribute",
+    "status": "pending",
+    "submitted_at": "2026-10-27T12:02:00.000Z"
+  },
+  "message": "Thank you. Your tribute was received and will appear after the family approves it."
+}
+```
+
+`POST /api/organizer/session` → `200` + `Set-Cookie`:
+
+<!-- schema: OrganizerSessionResponse -->
+```json
+{
+  "session": {
+    "memorial_id": "6ae0bb690d12c79223ec5c3e",
+    "expires_at": "2026-10-28T00:21:00.000Z"
+  }
+}
+```
+
+`PATCH /api/organizer/guestbook/:id` `{"status":"approved"}` → `200`:
+
+<!-- schema: ModerateGuestbookResponse -->
+```json
+{
+  "entry": {
+    "id": "6ae0bb690d12c79223ec5c3f",
+    "display_name": "Tomasz Reyes",
+    "message": "Thinking of your family today. Thank you for all those after-school lab sessions.",
+    "created_at": "2026-10-27T12:01:00.000Z",
+    "status": "approved",
+    "moderation_hints": [],
+    "moderated_at": "2026-10-27T12:16:00.000Z"
+  }
+}
+```
+
+`PATCH /api/organizer/stories/:id` `{"action":"publish","version":1}` → `200` (this story was seeded directly, because weave arrives in P5):
+
+<!-- schema: StoryUpdateResponse -->
+```json
+{
+  "story": {
+    "id": "6ae0bb690d12c79223ec5c45",
+    "memorial_id": "6ae0bb690d12c79223ec5c3e",
+    "status": "published",
+    "version": 2,
+    "title": "Remembering Elowen",
+    "paragraphs": [
+      {
+        "text": "Those who learned from Elowen remember her patience after class.",
+        "source_tribute_ids": [
+          "6ae0bb690d12c79223ec5c40"
+        ]
+      },
+      {
+        "text": "Her garden reached past her own fence, into her neighbours' kitchens.",
+        "source_tribute_ids": [
+          "6ae0bb690d12c79223ec5c42"
+        ]
+      }
+    ],
+    "flags": [],
+    "input_tribute_ids": [
+      "6ae0bb690d12c79223ec5c40",
+      "6ae0bb690d12c79223ec5c42"
+    ],
+    "ai": {
+      "model_id": "test-fixture (no model called)",
+      "provider_label": "Seeded test draft, not Gemma output"
+    },
+    "edited_by_organizer": false,
+    "created_at": "2026-10-27T12:15:00.000Z",
+    "updated_at": "2026-10-27T12:21:00.000Z",
+    "published_at": "2026-10-27T12:21:00.000Z"
+  },
+  "side_effects": {
+    "superseded_story_id": null
+  }
+}
+```
+
+`GET /api/organizer/memorials/:id` → `200` (one guest's entry is pending, one is rejected; tribute C is pending):
+
+<!-- schema: OrganizerMemorialResponse -->
+```json
+{
+  "memorial": {
+    "id": "6ae0bb690d12c79223ec5c3e",
+    "slug": "elowen-marsh-aprmkq",
+    "guest_path": "/m/elowen-marsh-aprmkq",
+    "name": "Elowen Marsh",
+    "birth_year": 1941,
+    "death_year": 2025,
+    "description": "Gardener, choir alto and retired chemistry teacher.",
+    "portrait": {
+      "kind": "placeholder",
+      "key": "neutral-1"
+    },
+    "visibility": "unlisted",
+    "created_at": "2026-10-27T12:00:00.000Z",
+    "updated_at": "2026-10-27T12:00:00.000Z"
+  },
+  "guestbook": [
+    {
+      "id": "6ae0bb690d12c79223ec5c43",
+      "display_name": "Priya Lindqvist",
+      "message": "Singing the alto line tonight for you, Elowen.",
+      "created_at": "2026-10-27T12:05:00.000Z",
+      "status": "pending",
+      "moderation_hints": [],
+      "moderated_at": null
+    },
+    {
+      "id": "6ae0bb690d12c79223ec5c41",
+      "display_name": "Ngozi Achterberg",
+      "message": "Your tomatoes are still growing on our windowsill. We miss you.",
+      "created_at": "2026-10-27T12:03:00.000Z",
+      "status": "rejected",
+      "moderation_hints": [],
+      "moderated_at": "2026-10-27T12:16:00.000Z"
+    },
+    {
+      "id": "6ae0bb690d12c79223ec5c3f",
+      "display_name": "Tomasz Reyes",
+      "message": "Thinking of your family today. Thank you for all those after-school lab sessions.",
+      "created_at": "2026-10-27T12:01:00.000Z",
+      "status": "approved",
+      "moderation_hints": [],
+      "moderated_at": "2026-10-27T12:16:00.000Z"
+    }
+  ],
+  "tributes": [
+    {
+      "id": "6ae0bb690d12c79223ec5c44",
+      "contributor_name": "Priya Lindqvist",
+      "relationship": "Choir friend",
+      "content": "Elowen sat next to me in the community choir for years. She was always the first to arrive and would hum while she set out the chairs. When I lost my nerve before my first solo, she squeezed my hand and told me to sing to one person I loved. I still do.",
+      "created_at": "2026-10-27T12:06:00.000Z",
+      "status": "pending",
+      "moderation_hints": [],
+      "moderated_at": null
+    },
+    {
+      "id": "6ae0bb690d12c79223ec5c42",
+      "contributor_name": "Ngozi Achterberg",
+      "relationship": "Neighbour",
+      "content": "Every August Elowen left bags of tomatoes from her garden on the doorsteps along our street, with handwritten notes about which ones were best for soup. When my son was small she let him help water the beans and gave him his own little row to look after.",
+      "created_at": "2026-10-27T12:04:00.000Z",
+      "status": "approved",
+      "moderation_hints": [],
+      "moderated_at": "2026-10-27T12:16:00.000Z"
+    },
+    {
+      "id": "6ae0bb690d12c79223ec5c40",
+      "contributor_name": "Tomasz Reyes",
+      "relationship": "Former student",
+      "content": "Mrs Marsh stayed after class every Thursday so anyone who was struggling could redo the experiments. She never made me feel slow. She used to say a mistake was just an experiment that wasn't finished yet. I became a pharmacist partly because of her patience.",
+      "created_at": "2026-10-27T12:02:00.000Z",
+      "status": "approved",
+      "moderation_hints": [],
+      "moderated_at": "2026-10-27T12:16:00.000Z"
+    }
+  ],
+  "stories": [
+    {
+      "id": "6ae0bb690d12c79223ec5c45",
+      "memorial_id": "6ae0bb690d12c79223ec5c3e",
+      "status": "published",
+      "version": 2,
+      "title": "Remembering Elowen",
+      "paragraphs": [
+        {
+          "text": "Those who learned from Elowen remember her patience after class.",
+          "source_tribute_ids": [
+            "6ae0bb690d12c79223ec5c40"
+          ]
+        },
+        {
+          "text": "Her garden reached past her own fence, into her neighbours' kitchens.",
+          "source_tribute_ids": [
+            "6ae0bb690d12c79223ec5c42"
+          ]
+        }
+      ],
+      "flags": [],
+      "input_tribute_ids": [
+        "6ae0bb690d12c79223ec5c40",
+        "6ae0bb690d12c79223ec5c42"
+      ],
+      "ai": {
+        "model_id": "test-fixture (no model called)",
+        "provider_label": "Seeded test draft, not Gemma output"
+      },
+      "edited_by_organizer": false,
+      "created_at": "2026-10-27T12:15:00.000Z",
+      "updated_at": "2026-10-27T12:21:00.000Z",
+      "published_at": "2026-10-27T12:21:00.000Z"
+    }
+  ],
+  "published_story_id": "6ae0bb690d12c79223ec5c45",
+  "counts": {
+    "guestbook": {
+      "pending": 1,
+      "approved": 1,
+      "rejected": 1
+    },
+    "tributes": {
+      "pending": 1,
+      "approved": 2,
+      "rejected": 0
+    }
+  }
+}
+```
+
+`GET /api/memorials/:slug` → `200`, `Cache-Control: private, no-cache`. Only approved items and the published story appear:
+
+<!-- schema: PublicMemorialResponse -->
+```json
+{
+  "memorial": {
+    "slug": "elowen-marsh-aprmkq",
+    "name": "Elowen Marsh",
+    "birth_year": 1941,
+    "death_year": 2025,
+    "description": "Gardener, choir alto and retired chemistry teacher.",
+    "portrait": {
+      "kind": "placeholder",
+      "key": "neutral-1"
+    },
+    "created_at": "2026-10-27T12:00:00.000Z"
+  },
+  "guestbook": [
+    {
+      "id": "6ae0bb690d12c79223ec5c3f",
+      "display_name": "Tomasz Reyes",
+      "message": "Thinking of your family today. Thank you for all those after-school lab sessions.",
+      "created_at": "2026-10-27T12:01:00.000Z"
+    }
+  ],
+  "tributes": [
+    {
+      "id": "6ae0bb690d12c79223ec5c42",
+      "contributor_name": "Ngozi Achterberg",
+      "relationship": "Neighbour",
+      "content": "Every August Elowen left bags of tomatoes from her garden on the doorsteps along our street, with handwritten notes about which ones were best for soup. When my son was small she let him help water the beans and gave him his own little row to look after.",
+      "created_at": "2026-10-27T12:04:00.000Z"
+    },
+    {
+      "id": "6ae0bb690d12c79223ec5c40",
+      "contributor_name": "Tomasz Reyes",
+      "relationship": "Former student",
+      "content": "Mrs Marsh stayed after class every Thursday so anyone who was struggling could redo the experiments. She never made me feel slow. She used to say a mistake was just an experiment that wasn't finished yet. I became a pharmacist partly because of her patience.",
+      "created_at": "2026-10-27T12:02:00.000Z"
+    }
+  ],
+  "story": {
+    "id": "6ae0bb690d12c79223ec5c45",
+    "title": "Remembering Elowen",
+    "paragraphs": [
+      {
+        "text": "Those who learned from Elowen remember her patience after class.",
+        "source_tribute_ids": [
+          "6ae0bb690d12c79223ec5c40"
+        ]
+      },
+      {
+        "text": "Her garden reached past her own fence, into her neighbours' kitchens.",
+        "source_tribute_ids": [
+          "6ae0bb690d12c79223ec5c42"
+        ]
+      }
+    ],
+    "edited_by_organizer": false,
+    "ai": {
+      "model_id": "test-fixture (no model called)",
+      "provider_label": "Seeded test draft, not Gemma output"
+    },
+    "published_at": "2026-10-27T12:21:00.000Z"
+  }
+}
+```
+
+`POST /api/organizer/memorials/:id/rotate-token` → `200`:
+
+<!-- schema: RotateTokenResponse -->
+```json
+{
+  "manage_path": "/manage/6ae0bb690d12c79223ec5c3e#key=zmn_ot_DEMO-ONLY-not-a-real-secret-000000000000000",
+  "organizer_token": "zmn_ot_DEMO-ONLY-not-a-real-secret-000000000000000",
+  "session": {
+    "memorial_id": "6ae0bb690d12c79223ec5c3e",
+    "expires_at": "2026-10-28T00:21:00.000Z"
+  }
+}
+```
+
+Errors returned by the real handlers:
+
+<!-- schema: ApiErrorBody -->
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Your organizer session is for a different memorial. Open this memorial's private link.",
+    "request_id": "req_n_nlCfkVL5Kd",
+    "retryable": false
+  }
+}
+```
+
+<!-- schema: ApiErrorBody -->
+```json
+{
+  "error": {
+    "code": "UNAUTHENTICATED",
+    "message": "Your organizer session has expired. Open your private organizer link again.",
+    "request_id": "req_b5jxXLb61wzD",
+    "retryable": false
+  }
+}
+```
+
+<!-- schema: ApiErrorBody -->
+```json
+{
+  "error": {
+    "code": "AI_UNAVAILABLE",
+    "message": "The AI service is unavailable right now. Nothing was saved. Please try again later.",
+    "request_id": "req_v5wiE5uX-2pq",
+    "retryable": true
+  }
+}
+```
+
+`GET /api/health` → `200`:
+
+<!-- schema: HealthResponse -->
+```json
+{
+  "status": "ok",
+  "checks": {
+    "database": "ok",
+    "ai": "unconfigured"
+  }
+}
+```
+
+---
+
+## 11. Change control
 
 Changes to routes, field names, enums or status codes need a contract revision:
 1. Bump the contract version.

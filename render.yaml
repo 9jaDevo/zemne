@@ -1,0 +1,31 @@
+# P3 specification for manually provisioned zemne-preview (not Blueprint-managed).
+# Do not apply as a new Blueprint without reconciling the existing service.
+services:
+  - type: web
+    name: zemne-preview
+    runtime: node
+    plan: free
+    region: virginia
+    repo: https://github.com/9jaDevo/zemne
+    branch: codex/p6-live-integration
+    autoDeployTrigger: off
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: node scripts/infra/render-start.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.11.1
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMMA_API_BASE_URL
+        sync: false
+      - key: GEMMA_MODEL_ID
+        sync: false
+      - key: GEMMA_API_KEY
+        sync: false

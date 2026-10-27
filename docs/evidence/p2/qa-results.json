@@ -1,0 +1,119 @@
+{
+  "at": "2026-10-27T10:18:21.266Z",
+  "browser": "151.0.7922.34",
+  "renderer": "Chromium headless / SwiftShader software WebGL",
+  "webgl": {
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "width": 873,
+    "height": 650
+  },
+  "checks": [
+    {
+      "name": "real 3D guestbook marker opens its destination",
+      "result": "PASS"
+    },
+    {
+      "name": "real 3D tribute marker opens its destination",
+      "result": "PASS"
+    },
+    {
+      "name": "real 3D wall marker opens its destination",
+      "result": "PASS"
+    },
+    {
+      "name": "guestbook submits pending and stays out of public list",
+      "result": "PASS"
+    },
+    {
+      "name": "tribute submits pending without leaking to visitors",
+      "result": "PASS"
+    },
+    {
+      "name": "organizer sees and approves pending guestbook and tribute",
+      "result": "PASS"
+    },
+    {
+      "name": "demo weave creates a labeled draft; edits gate publication",
+      "result": "PASS"
+    },
+    {
+      "name": "published edits appear to guests and source opens approved text",
+      "result": "PASS"
+    },
+    {
+      "name": "unpublish removes the remembrance from the guest wall",
+      "result": "PASS"
+    },
+    {
+      "name": "AI-unavailable state reports failure and supports explicit retry",
+      "result": "PASS"
+    },
+    {
+      "name": "create validates year order and shows recoverability handoff",
+      "result": "PASS"
+    },
+    {
+      "name": "new memorial has working empty states and equivalent 2D destinations",
+      "result": "PASS"
+    },
+    {
+      "name": "no horizontal overflow at 375/390/768/1440",
+      "result": "PASS"
+    },
+    {
+      "name": "reduced motion and keyboard destination activation",
+      "result": "PASS"
+    },
+    {
+      "name": "WebGL context loss preserves destination forms",
+      "result": "PASS"
+    },
+    {
+      "name": "WebGL-disabled browser retains full 2D actions",
+      "result": "PASS"
+    }
+  ],
+  "overflow": [
+    {
+      "viewport": 375,
+      "document": 375
+    },
+    {
+      "viewport": 390,
+      "document": 390
+    },
+    {
+      "viewport": 768,
+      "document": 768
+    },
+    {
+      "viewport": 1440,
+      "document": 1440
+    }
+  ],
+  "a11y": [
+    {
+      "route": "/",
+      "violations": []
+    },
+    {
+      "route": "/demo?mode=2d",
+      "violations": []
+    },
+    {
+      "route": "/demo?view=create",
+      "violations": []
+    },
+    {
+      "route": "/identity",
+      "violations": []
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "limitations": [
+    "Single-tab in-memory P1 mock, not backend or security acceptance",
+    "Software GPU; no physical iOS/Android or live hosting test",
+    "No real Gemma inference or persistent data"
+  ]
+}

@@ -19,7 +19,8 @@ import {
   RotateTokenResponseSchema,
   StoryUpdateResponseSchema,
   SubmissionReceiptResponseSchema,
-  WeaveResponseSchema,
+  WeaveStartResponseSchema,
+  WeaveStatusResponseSchema,
   type CreateMemorialRequest,
   type CreateMemorialResponse,
   type GuestbookSubmissionRequest,
@@ -36,7 +37,9 @@ import {
   type StoryUpdateResponse,
   type SubmissionReceiptResponse,
   type TributeSubmissionRequest,
+  type WeaveJob,
   type WeaveResponse,
+  type WeaveStatusResponse,
 } from "./schemas";
 
 export interface ZemneApiClient {
@@ -54,7 +57,13 @@ export interface ZemneApiClient {
   rotateOrganizerToken(memorialId: string): Promise<RotateTokenResponse>;
   moderateGuestbookEntry(entryId: string, input: ModerationRequest): Promise<ModerateGuestbookResponse>;
   moderateTribute(tributeId: string, input: ModerationRequest): Promise<ModerateTributeResponse>;
+  /**
+   * Starts a weave and resolves when the draft is ready (real Gemma takes
+   * ~1–4 minutes). Rejects with the job's AI error code on failure.
+   */
   weaveStory(memorialId: string): Promise<WeaveResponse>;
+  /** Latest weave job for the memorial (e.g. to resume a spinner after reload). */
+  getWeaveStatus(memorialId: string): Promise<WeaveStatusResponse>;
   updateStory(storyId: string, input: StoryUpdateRequest): Promise<StoryUpdateResponse>;
 }
 
@@ -62,13 +71,25 @@ export interface HttpClientOptions {
   /** Defaults to "" (same origin). Organizer routes only work same-origin. */
   baseUrl?: string;
   fetch?: typeof fetch;
+  /** Weave status poll interval. Default 4000 ms. */
+  weavePollMs?: number;
+  /** Give up waiting for a weave after this long. Default 300000 ms (job deadline is 230 s). */
+  weaveMaxWaitMs?: number;
 }
 
 type Method = "GET" | "POST" | "PATCH" | "DELETE";
 
+/** Converts a failed weave job into the same error the UI handles elsewhere. */
+export function jobError(job: WeaveJob): ZemneApiError {
+  const e = job.error ?? { code: "INTERNAL" as const, message: "The weave failed.", retryable: true };
+  return new ZemneApiError(makeErrorBody(e.code, { requestId: `weave-${job.id}`, message: e.message }));
+}
+
 export function createHttpClient(options: HttpClientOptions = {}): ZemneApiClient {
   const baseUrl = options.baseUrl ?? "";
   const doFetch = options.fetch ?? globalThis.fetch.bind(globalThis);
+  const pollMs = options.weavePollMs ?? 4000;
+  const maxWaitMs = options.weaveMaxWaitMs ?? 300_000;
 
   async function request<S extends z.ZodType>(method: Method, path: string, schema: S | null, body?: unknown) {
     let res: Response;
@@ -118,7 +139,22 @@ export function createHttpClient(options: HttpClientOptions = {}): ZemneApiClien
     rotateOrganizerToken: (id) => request("POST", API_ROUTES.rotateToken(id), RotateTokenResponseSchema, {}),
     moderateGuestbookEntry: (id, input) => request("PATCH", API_ROUTES.moderateGuestbook(id), ModerateGuestbookResponseSchema, input),
     moderateTribute: (id, input) => request("PATCH", API_ROUTES.moderateTribute(id), ModerateTributeResponseSchema, input),
-    weaveStory: (id) => request("POST", API_ROUTES.weave(id), WeaveResponseSchema, {}),
+    weaveStory: async (id) => {
+      let { job } = await request("POST", API_ROUTES.weave(id), WeaveStartResponseSchema, {});
+      const deadline = Date.now() + maxWaitMs;
+      for (;;) {
+        if (job.status === "failed") throw jobError(job);
+        if (Date.now() > deadline) throw new ZemneApiError(makeErrorBody("AI_TIMEOUT", { requestId: "client-wait" }));
+        if (job.status === "running") await new Promise((r) => setTimeout(r, pollMs));
+        const status = await request("GET", API_ROUTES.weave(id), WeaveStatusResponseSchema);
+        if (!status.job || status.job.id !== job.id) {
+          throw new ZemneApiError(makeErrorBody("INTERNAL", { requestId: "client-wait", message: "The weave was replaced by another one. Reload to see the latest draft." }));
+        }
+        job = status.job;
+        if (job.status === "succeeded" && status.story) return { story: status.story };
+      }
+    },
+    getWeaveStatus: (id) => request("GET", API_ROUTES.weave(id), WeaveStatusResponseSchema),
     updateStory: (id, input) => request("PATCH", API_ROUTES.story(id), StoryUpdateResponseSchema, input),
   };
 }

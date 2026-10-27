@@ -1,0 +1,71 @@
+[
+  {
+    "asset": "oak",
+    "map": "Diffuse",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_wood_planks/oak_wood_planks_diff_1k.jpg",
+    "license": "CC0",
+    "sha256": "F715ED3E4346E94F971EF8DD61221FF6CC774886C20F65381E01E1DC0BB0A634"
+  },
+  {
+    "asset": "oak",
+    "map": "nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_wood_planks/oak_wood_planks_nor_gl_1k.jpg",
+    "license": "CC0",
+    "sha256": "B4272CB2818F8F33F2620A2DC093C962F34920E9D485A4E132EB6D69DE1BA950"
+  },
+  {
+    "asset": "oak",
+    "map": "Rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_wood_planks/oak_wood_planks_rough_1k.jpg",
+    "license": "CC0",
+    "sha256": "10CED559145DF3C537BF1CCEF6DC767EF6C47E134C21A9650BAB261FA95ECACF"
+  },
+  {
+    "asset": "studio_small_09",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+    "license": "CC0",
+    "sha256": "E7CFDA5F4E98E623DB12B8BFD0184E048488E4855D9C83E2751FB44A32E80C45"
+  },
+  {
+    "asset": "beige_wall_001",
+    "map": "Diffuse",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/beige_wall_001/beige_wall_001_diff_1k.jpg",
+    "license": "CC0",
+    "sha256": "72104704D0B9BD3713C5F6238971252B63ECCF6E61263059C674CAA8F3D0FA6D"
+  },
+  {
+    "asset": "beige_wall_001",
+    "map": "nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/beige_wall_001/beige_wall_001_nor_gl_1k.jpg",
+    "license": "CC0",
+    "sha256": "CEC747BE50F91DA0693986080B6F59EF868D53CB2AB7D577982165ECE63ED75E"
+  },
+  {
+    "asset": "beige_wall_001",
+    "map": "Rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/beige_wall_001/beige_wall_001_rough_1k.jpg",
+    "license": "CC0",
+    "sha256": "FC8328F47F4D2D82D5311A75BCB5C8CD8979D171A0EE097AD9E44CA9C5A00D60"
+  },
+  {
+    "asset": "marble_01",
+    "map": "Diffuse",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_diff_1k.jpg",
+    "license": "CC0",
+    "sha256": "B10DABEA976D68BAA976A0D4E8DAC58789DF8D26A1B50697F320106F1B00A229"
+  },
+  {
+    "asset": "marble_01",
+    "map": "nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_nor_gl_1k.jpg",
+    "license": "CC0",
+    "sha256": "77C2A9B549A6A408659F8197BE91945AEB0ABC33E697F1DD2CE24EE8DC7C2BC0"
+  },
+  {
+    "asset": "marble_01",
+    "map": "Rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/marble_01/marble_01_rough_1k.jpg",
+    "license": "CC0",
+    "sha256": "A3E9F373D22AEBC449AF73F6A18C9817E2146F17E567A083609BA8FBB62A72F5"
+  }
+]

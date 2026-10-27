@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-27T10:26:37.065Z",
+  "browser": "151.0.7922.34",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "isMobile": true,
+  "hasTouch": true,
+  "reducedMotion": true,
+  "checks": [
+    {
+      "marker": "guestbook",
+      "result": "PASS"
+    },
+    {
+      "marker": "tribute",
+      "result": "PASS"
+    },
+    {
+      "marker": "wall",
+      "result": "PASS"
+    }
+  ],
+  "limitation": "Chromium touch emulation, not a physical device"
+}

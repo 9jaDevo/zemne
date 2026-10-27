@@ -1,0 +1,73 @@
+{
+  "testedCommit": "fca4032517f838192970c67f0b32814a7288db83",
+  "renderDeployment": "dep-dbgd7snf3r2c73cc86bg",
+  "capturedAt": "2026-10-27T16:42:54.867Z",
+  "checks": {
+    "/": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/create": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/m/mira-vale-synthetic-p6-rehearsal-kkr2i9": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/manage/6ae0d31468075706584d76fe": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/favicon.svg": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/favicon.ico": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/manifest.webmanifest": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    },
+    "/api/health": {
+      "status": 200,
+      "cache": "private, no-store, max-age=0",
+      "referrer": "no-referrer",
+      "robots": "noindex, nofollow"
+    }
+  },
+  "metadata": {
+    "hasFavicon": true,
+    "hasManifest": true,
+    "noPrivateToken": true
+  },
+  "health": {
+    "status": "ok",
+    "checks": {
+      "database": "ok",
+      "ai": "configured"
+    }
+  },
+  "publicBeforePublication": {
+    "guestbook": 1,
+    "tributes": 3,
+    "story": null,
+    "containsOwnerHash": false
+  }
+}
