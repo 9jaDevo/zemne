@@ -4,7 +4,7 @@
  * before touching the database (no DB is configured here).
  */
 import { existsSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const ROUTES: Record<string, { methods: string[]; load: () => Promise<Record<string, unknown>> }> = {
   "src/app/api/health/route.ts": { methods: ["GET"], load: () => import("@/app/api/health/route") },
@@ -23,6 +23,17 @@ const ROUTES: Record<string, { methods: string[]; load: () => Promise<Record<str
 
 type RouteFn = (req: Request, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>;
 const ctx = { params: Promise.resolve({ slug: "elowen-marsh-k7q2xm", id: "65d000000000000000000001" }) };
+
+/**
+ * A cold first import pulls in the MongoDB driver, Zod and the server modules;
+ * on Windows this measured ~10 s (QA BUG-P7-03), past Vitest's 5 s per-test
+ * default. Load every route once here, with room to spare, so each test below
+ * only inspects already-loaded modules.
+ */
+const COLD_IMPORT_TIMEOUT_MS = 60_000;
+beforeAll(async () => {
+  await Promise.all(Object.values(ROUTES).map((spec) => spec.load()));
+}, COLD_IMPORT_TIMEOUT_MS);
 
 describe("Next.js route wiring", () => {
   it.each(Object.entries(ROUTES))("%s exports exactly the contract methods, Node runtime, dynamic", async (file, spec) => {

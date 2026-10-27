@@ -4,7 +4,7 @@ import { demoPersonas } from "../../src/shared/fixtures";
 import { GemmaError, createGemmaClient, providerLabelFor, stripReasoning } from "../../src/lib/ai/gemma-client";
 import { groundingFlags } from "../../src/lib/ai/grounding";
 import { buildWeavePrompt } from "../../src/lib/ai/prompt";
-import { WeaveError, weaveRemembrance } from "../../src/lib/ai/weaver";
+import { MIN_CALL_BUDGET_MS, OVERLOAD_BACKOFF_MS, WEAVE_BUDGET_MS, WeaveError, weaveRemembrance } from "../../src/lib/ai/weaver";
 import { scriptedGemma } from "./helpers/scripted-gemma";
 
 const memorial = { name: "Elowen Marsh", birth_year: 1941, death_year: 2025, description: "Gardener, choir alto and retired chemistry teacher." };
@@ -103,16 +103,49 @@ describe("weaveRemembrance pipeline", () => {
 
   it("maps timeouts and outages to AI_TIMEOUT / AI_UNAVAILABLE with no output", async () => {
     await expect(weaveRemembrance(scriptedGemma([new GemmaError("timeout")]), memorial, tributes)).rejects.toMatchObject({ code: "AI_TIMEOUT" });
-    // Overload (429/5xx) gets exactly one retry; a second overload fails.
-    const overloaded = scriptedGemma([new GemmaError("unavailable", 429), new GemmaError("unavailable", 503)]);
-    await expect(weaveRemembrance(overloaded, memorial, tributes, { retryDelayMs: 0 })).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:503" });
-    expect(overloaded.prompts).toHaveLength(2);
+    // Overload (429/5xx) is retried up to 3 times; a 4th overload fails.
+    const overloaded = scriptedGemma([429, 503, 500, 503].map((s) => new GemmaError("unavailable", s)));
+    await expect(weaveRemembrance(overloaded, memorial, tributes, { backoffMs: [0, 0, 0] })).rejects.toMatchObject({
+      code: "AI_UNAVAILABLE",
+      detail: "unavailable:503; overload retries 3",
+    });
+    expect(overloaded.prompts).toHaveLength(4);
     // Auth/config errors are not retried.
     const badKey = scriptedGemma([new GemmaError("unavailable", 401)]);
-    await expect(weaveRemembrance(badKey, memorial, tributes, { retryDelayMs: 0 })).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:401" });
+    await expect(weaveRemembrance(badKey, memorial, tributes, { backoffMs: [0, 0, 0] })).rejects.toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:401; overload retries 0" });
     expect(badKey.prompts).toHaveLength(1);
     let t = 0;
     await expect(weaveRemembrance(scriptedGemma([good]), memorial, tributes, { budgetMs: 1000, now: () => (t += 0) })).rejects.toBeInstanceOf(WeaveError);
+  });
+
+  it("QA P7 regression: survives repeated upstream overload within budget", async () => {
+    // Production QA's weave produced no draft in 240 s; P5 measured frequent 500/503s.
+    const model = scriptedGemma([new GemmaError("unavailable", 503), new GemmaError("unavailable", 500), new GemmaError("unavailable", 503), good]);
+    const r = await weaveRemembrance(model, memorial, tributes, { backoffMs: [0, 0, 0] });
+    expect(r.overloadRetries).toBe(3);
+    expect(r.attempts).toBe(1); // overload retries do not consume the repair attempt
+    expect(model.prompts).toHaveLength(4);
+    expect(model.prompts.every((p) => p === model.prompts[0])).toBe(true); // same prompt, not a repair prompt
+  });
+
+  it("does not retry an overload when too little budget would remain for a real call", async () => {
+    let clock = 0;
+    // Each failed call "takes" 70 s of a 150 s budget: after one, 80 s remain;
+    // waiting 3 s still leaves >= 60 s, so one retry; after the second, 10 s remain -> stop.
+    const slowFail = () => {
+      clock += 70_000;
+      throw new GemmaError("unavailable", 503);
+    };
+    const model = scriptedGemma([slowFail, slowFail, good]);
+    const err = await weaveRemembrance(model, memorial, tributes, { budgetMs: 150_000, backoffMs: [0, 0, 0], now: () => clock }).catch((e) => e);
+    expect(err).toMatchObject({ code: "AI_UNAVAILABLE", detail: "unavailable:503; overload retries 1" });
+    expect(model.prompts).toHaveLength(2);
+  });
+
+  it("uses a 220 s budget and 3 s/8 s/15 s backoff by default", () => {
+    expect(WEAVE_BUDGET_MS).toBe(220_000);
+    expect([...OVERLOAD_BACKOFF_MS]).toEqual([3_000, 8_000, 15_000]);
+    expect(MIN_CALL_BUDGET_MS).toBe(60_000);
   });
 
   it("flags invented years, names and weakly grounded paragraphs for review", async () => {

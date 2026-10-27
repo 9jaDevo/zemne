@@ -59,7 +59,7 @@ export interface ZemneApiClient {
   moderateTribute(tributeId: string, input: ModerationRequest): Promise<ModerateTributeResponse>;
   /**
    * Starts a weave and resolves when the draft is ready (real Gemma takes
-   * ~1–3 minutes). Rejects with the job's AI error code on failure.
+   * ~1–4 minutes). Rejects with the job's AI error code on failure.
    */
   weaveStory(memorialId: string): Promise<WeaveResponse>;
   /** Latest weave job for the memorial (e.g. to resume a spinner after reload). */
@@ -73,7 +73,7 @@ export interface HttpClientOptions {
   fetch?: typeof fetch;
   /** Weave status poll interval. Default 4000 ms. */
   weavePollMs?: number;
-  /** Give up waiting for a weave after this long. Default 240000 ms. */
+  /** Give up waiting for a weave after this long. Default 300000 ms (job deadline is 230 s). */
   weaveMaxWaitMs?: number;
 }
 
@@ -89,7 +89,7 @@ export function createHttpClient(options: HttpClientOptions = {}): ZemneApiClien
   const baseUrl = options.baseUrl ?? "";
   const doFetch = options.fetch ?? globalThis.fetch.bind(globalThis);
   const pollMs = options.weavePollMs ?? 4000;
-  const maxWaitMs = options.weaveMaxWaitMs ?? 240_000;
+  const maxWaitMs = options.weaveMaxWaitMs ?? 300_000;
 
   async function request<S extends z.ZodType>(method: Method, path: string, schema: S | null, body?: unknown) {
     let res: Response;
