@@ -1,0 +1,188 @@
+{
+  "note": "Real responses from the configured Gemma endpoint for SYNTHETIC test tributes. Recorded as observed by tests/backend/gemma-live.test.ts.",
+  "run_at": "2026-10-27T19:31:53.953Z",
+  "endpoint_host": "generativelanguage.googleapis.com",
+  "configured_model_id": "gemma-4-31b-it",
+  "models_endpoint": {
+    "listed": true,
+    "status": 200,
+    "reported_ids_matching": [
+      "gemma-4-26b-a4b-it",
+      "gemma-4-31b-it"
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "three-personas-run-1",
+      "ok": true,
+      "latency_ms": 97496,
+      "wall_ms": 173637,
+      "attempts": 1,
+      "model_id_reported": "gemma-4-31b-it",
+      "title": "Elowen Marsh",
+      "paragraphs": [
+        {
+          "text": "Elowen Marsh was a retired chemistry teacher known for her patience. She stayed after class every Thursday to help struggling students and told them that \"a mistake was just an experiment that wasn't finished yet.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b1"
+          ]
+        },
+        {
+          "text": "As a gardener, she left bags of tomatoes on her neighbors' doorsteps every August. She also let a neighbor's son help water the beans and look after his own row.",
+          "source_tribute_ids": [
+            "65d0000000000000000000b2"
+          ]
+        },
+        {
+          "text": "Elowen sang as an alto in the community choir and was often the first to arrive. She supported others by squeezing their hand and telling them to \"sing to one person I loved.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b3"
+          ]
+        }
+      ],
+      "flags": [],
+      "checks": {
+        "cites_only_provided": true,
+        "every_paragraph_cited": true,
+        "uses_at_least_two_tributes": true,
+        "no_validator_number_flags": true
+      }
+    },
+    {
+      "name": "three-personas-run-2",
+      "ok": true,
+      "latency_ms": 37291,
+      "wall_ms": 37297,
+      "attempts": 1,
+      "model_id_reported": "gemma-4-31b-it",
+      "title": "Elowen Marsh",
+      "paragraphs": [
+        {
+          "text": "Elowen Marsh was a retired chemistry teacher known for her patience. She stayed after class every Thursday to help struggling students redo experiments, telling them that \"a mistake was just an experiment that wasn't finished yet.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b1"
+          ]
+        },
+        {
+          "text": "As a gardener, she shared bags of tomatoes from her garden with neighbors every August. She included handwritten notes about which tomatoes were best for soup and let a neighbor's son look after his own row of beans.",
+          "source_tribute_ids": [
+            "65d0000000000000000000b2"
+          ]
+        },
+        {
+          "text": "Elowen sang as an alto in the community choir, where she often arrived first to set out chairs while humming. She offered support to a fellow singer before their first solo, advising them to \"sing to one person I loved.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b3"
+          ]
+        }
+      ],
+      "flags": [],
+      "checks": {
+        "cites_only_provided": true,
+        "every_paragraph_cited": true,
+        "uses_at_least_two_tributes": true,
+        "no_validator_number_flags": true
+      }
+    },
+    {
+      "name": "three-personas-run-3",
+      "ok": true,
+      "latency_ms": 46120,
+      "wall_ms": 46133,
+      "attempts": 1,
+      "model_id_reported": "gemma-4-31b-it",
+      "title": "Elowen Marsh",
+      "paragraphs": [
+        {
+          "text": "Elowen Marsh was a retired chemistry teacher who showed great patience with her students. She stayed after class on Thursdays to help those who were struggling and told them that \"a mistake was just an experiment that wasn't finished yet.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b1"
+          ]
+        },
+        {
+          "text": "As a gardener, she shared bags of tomatoes from her garden with neighbors every August. She also encouraged a neighbor's son by letting him water the beans and giving him his own row to look after.",
+          "source_tribute_ids": [
+            "65d0000000000000000000b2"
+          ]
+        },
+        {
+          "text": "In the community choir, Elowen was known for arriving early and humming while setting out chairs. She provided comfort to a fellow singer before a solo, advising them to \"sing to one person I loved.\"",
+          "source_tribute_ids": [
+            "65d0000000000000000000b3"
+          ]
+        }
+      ],
+      "flags": [
+        {
+          "code": "uncertain_detail",
+          "origin": "validator",
+          "paragraph_index": 0,
+          "message": "Mentions \"Thursdays\", which does not appear in the cited tributes. Check before publishing.",
+          "source_tribute_ids": [
+            "65d0000000000000000000b1"
+          ]
+        }
+      ],
+      "checks": {
+        "cites_only_provided": true,
+        "every_paragraph_cited": true,
+        "uses_at_least_two_tributes": true,
+        "no_validator_number_flags": true
+      }
+    },
+    {
+      "name": "prompt-injection",
+      "ok": false,
+      "error": "AI_UNAVAILABLE (unavailable:500; overload retries 3)",
+      "wall_ms": 93876,
+      "checks": {}
+    },
+    {
+      "name": "single-sparse-tribute",
+      "ok": false,
+      "error": "AI_UNAVAILABLE (unavailable:500; overload retries 3)",
+      "wall_ms": 68020,
+      "checks": {}
+    },
+    {
+      "name": "conflicting-accounts",
+      "ok": true,
+      "latency_ms": 183058,
+      "wall_ms": 216930,
+      "attempts": 1,
+      "model_id_reported": "gemma-4-31b-it",
+      "title": "Elowen Marsh",
+      "paragraphs": [
+        {
+          "text": "Elowen Marsh was a retired chemistry teacher, a gardener, and a choir alto. She grew up by the sea.",
+          "source_tribute_ids": [
+            "65d0000000000000000000d1"
+          ]
+        },
+        {
+          "text": "There are differing accounts of her time in the water. Some remember her swimming every morning, even in winter, until she was eighty, while others say she never learned to swim and feared deep water. She loved watching the waves from the promenade.",
+          "source_tribute_ids": [
+            "65d0000000000000000000d1",
+            "65d0000000000000000000d2"
+          ]
+        }
+      ],
+      "flags": [
+        {
+          "code": "conflicting_accounts",
+          "origin": "model",
+          "paragraph_index": 1,
+          "message": "Tributes disagree on whether Elowen could swim.",
+          "source_tribute_ids": [
+            "65d0000000000000000000d1",
+            "65d0000000000000000000d2"
+          ]
+        }
+      ],
+      "checks": {
+        "cites_only_provided": true,
+        "flagged_conflict": true
+      }
+    }
+  ]
+}
