@@ -91,9 +91,9 @@ describe("DEMO mock client follows the contract", () => {
     await expectCode(client.getOrganizerMemorial(DEMO_IDS.memorial), "UNAUTHENTICATED");
   });
 
-  it("returns 404 for another memorial's resources", async () => {
+  it("returns 403 for another memorial and 404 for its items", async () => {
     await client.createMemorial({ name: "Other", description: "Fictional.", privacy_acknowledged: true }); // session now for the new memorial
-    await expectCode(client.getOrganizerMemorial(DEMO_IDS.memorial), "NOT_FOUND");
+    await expectCode(client.getOrganizerMemorial(DEMO_IDS.memorial), "FORBIDDEN");
     await expectCode(client.moderateTribute(DEMO_IDS.tributes.guestA, { status: "rejected" }), "NOT_FOUND");
   });
 

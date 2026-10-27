@@ -109,10 +109,10 @@ export function createMockClient(options: MockClientOptions = {}): MockZemneClie
 
   const bySlug = (slug: string) => [...memorials.values()].find((m) => m.memorial.slug === slug) ?? fail("NOT_FOUND");
 
-  /** Mirrors server authorization: no session -> 401; other memorial -> 404 (no existence oracle). */
+  /** Mirrors server authorization: no session -> 401; session for another memorial -> 403. Items of other memorials -> 404. */
   function owned(memorialId: string): DemoMemorialState {
     if (!session || new Date(session.expires_at) <= now()) fail("UNAUTHENTICATED");
-    if (session!.memorial_id !== memorialId) fail("NOT_FOUND");
+    if (session!.memorial_id !== memorialId) fail("FORBIDDEN");
     return memorials.get(memorialId) ?? fail("NOT_FOUND");
   }
   const sessionState = () => owned(session?.memorial_id ?? "");
