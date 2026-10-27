@@ -11,7 +11,7 @@
 ## Current summary
 | Phase | Owner | Outcome | State |
 |---|---|---|---|
-| P0 | Codex | New public repository and tooling | NOT STARTED |
+| P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
 | P1 | Claude | Backend/API contract and fixtures | NOT STARTED |
 | P2 | Codex | Original branding and real 3D + screens | NOT STARTED |
 | P3 | Codex | Atlas + Render provisioning | NOT STARTED |
@@ -24,15 +24,26 @@
 ---
 
 ## P0 — Create repository and foundation [CODEX]
-- [ ] Verify new project and public GitHub repo `zemne` were created during Week 4 window; record exact date and repo URL.
-- [ ] Place all three project documents at repo root (or `docs/` with consistent paths).
-- [ ] Scaffold a single React + TypeScript + Next.js web app with React Three Fiber, Tailwind, lint/typecheck/test infrastructure.
-- [ ] Configure safe public repo defaults: `.gitignore`, `.env.example`, no secrets, license/readme, access-controlled main branch if available.
-- [ ] Create shared folder boundaries and design/backend placeholders, no fake functional claims.
-- [ ] Run install/build/lint; initial clean commit.
+- [x] Verify new project and public GitHub repo `zemne` were created during Week 4 window; record exact date and repo URL.
+- [x] Place all three project documents at repo root (or `docs/` with consistent paths).
+- [x] Scaffold a single React + TypeScript + Next.js web app with React Three Fiber, Tailwind, lint/typecheck/test infrastructure.
+- [x] Configure safe public repo defaults: `.gitignore`, `.env.example`, no secrets, license/readme, access-controlled main branch if available. README documents license decision deferred; package is UNLICENSED pending explicit owner approval.
+- [x] Create shared folder boundaries and design/backend placeholders, no fake functional claims.
+- [x] Run install/build/lint; initial clean commit.
 **Gate:** public repository is accessible; app boots; no secret in tracked files.
-**Evidence:** Repo URL ___ | Commit ___ | Tests ___ | Date ___
-**Handoff to Claude:** branch/paths, framework version, agreed shared-types directory.
+**Evidence:** https://github.com/9jaDevo/zemne | Initial commit `4997355fbbe2111564e4fd920b2587eb1ba44cc7` | Cross-platform lockfile fix `63e7a5a5550d91b090ab3bc8b4b119147877f60b` | Date October 27, 2026.
+
+### P0 execution evidence and handoff — Codex
+- GitHub API verified `visibility: public`, owner `9jaDevo`, admin access, and `created_at: 2026-10-27T09:07:38Z` (October 27 at 05:07:38 EDT), inside the blueprint's Week 4 window. No backdating or previous implementation reuse. Initial implementation commit and remote `main` pushed during the window.
+- Stack installed: Next.js 16.4.3 App Router, React/React DOM 19.3.1, TypeScript 5.9.3, Tailwind 4.3.3, React Three Fiber 9.8.2, Three.js 0.180.0, Vitest 5.0.5; Node 24.11.1 / npm 11.6.2 locally. Exact dependency graph in `package-lock.json`.
+- Commands passed: `npm install`, fresh `npm ci`, `npm run lint` (zero warnings), `npm run typecheck`, `npm test` (1 file, 2 repository guardrail tests), `npm run build`. Install/audit after toolchain updates reported zero vulnerabilities. These tests do not prove product functionality/security.
+- Production HTTP smoke: `npm start -- --hostname 127.0.0.1 --port 3100`; GET `/` returned 200 with the explicit under-development notice; GET `/api/health` returned 404, as no API is implemented in P0. Server stopped after check. No browser/device QA or deployment claimed.
+- CI: initial Linux run https://github.com/9jaDevo/zemne/actions/runs/40480092738 failed at `npm ci` because the Windows-generated lockfile omitted cross-platform optional entries. Regenerated in an empty temporary directory; fix `63e7a5a` passed all Linux CI steps: https://github.com/9jaDevo/zemne/actions/runs/40480703438.
+- Main protection verified through GitHub API: strict required `verify` check; force pushes and branch deletion disabled. Administrator bypass remains enabled for the sole owner; branch restrictions and mandatory human review are not configured. Use feature branches/PRs and passing CI for future integration.
+- Safety review: inspected all staged source/configuration and the three planning documents; no actual credentials/user records present. Pattern scan found no credential signatures in implementation; environment/private-key ignores verified. `.env.example` has only the five backend variable names, without values or `=`. Local commit identity uses GitHub noreply email. Blueprint and phase prompts preserved; only P0/its summary row edited in this tracker.
+- Files: root tooling/configuration, lockfile, README, `.github/workflows/ci.yml`, `src/app/{layout.tsx,page.tsx,globals.css}`, `tests/scaffold.test.ts`; empty ownership directories tracked with `.gitkeep`. No logo/3D scene, API handler, database/AI logic, synthetic product fixture, cloud provisioning or deployment implemented.
+- Limitations: license grant awaits explicit owner approval (no LICENSE file); ESLint 9.39.5 has an upstream support warning. ESLint 10 was evaluated but reverted because bundled Next.js React/import/accessibility plugins declare incompatible peers; compatible ESLint 9 passes lint. No production-readiness claim.
+- **Exact Claude P1 handoff:** fetch/pull latest `main` from `https://github.com/9jaDevo/zemne.git`; create a short feature branch, e.g. `claude/p1-contracts`. Re-read master/tracker. Author `docs/API_CONTRACT.md`; own runtime schemas/types in `src/shared`, sanitized fictional memorial/three-persona fixtures in `fixtures`, validation tests in `tests/backend/*.test.ts`. Use imports from `@/shared/...` in app code. Vitest discovers `tests/**/*.test.{ts,tsx}` with Node environment; configure any test import aliases if needed. Choose/install runtime validation in P1; it is deliberately not predefined in P0. Specify all route/error/state, secret-fragment exchange, scoped cookie/expiry, CSRF/origin, moderation, rate-limit and source-linked Gemma JSON contracts required by the P1 prompt. Do not implement full APIs, alter Codex frontend/brand/3D, provision resources or begin P2. Run lint/typecheck/test/build, update only P1, and return commit/PR plus exact type/fixture integration paths.
 
 ## P1 — Data types and HTTP contracts [CLAUDE]
 - [ ] Create `docs/API_CONTRACT.md` with endpoints, error shapes, auth/permission model and JSON fixtures.
