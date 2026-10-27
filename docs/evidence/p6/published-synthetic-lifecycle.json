@@ -1,0 +1,82 @@
+{
+  "capturedAt": "2026-10-27T16:48:57.026Z",
+  "guestbook": 1,
+  "tributes": 3,
+  "publishedTitle": "Mira Vale — patience and shared gardens",
+  "model": "gemma-4-31b-it",
+  "editedByOrganizer": true,
+  "paragraphs": 2,
+  "allCitationIdsInApprovedPublicTributes": true,
+  "anonymousOrganizerStatus": 401,
+  "anonymousOrganizerCache": "private, no-store, max-age=0",
+  "publicResponse": {
+    "memorial": {
+      "slug": "mira-vale-synthetic-p6-rehearsal-kkr2i9",
+      "name": "Mira Vale — synthetic P6 rehearsal",
+      "birth_year": 1948,
+      "death_year": 2025,
+      "description": "Fictional community gardener and patient teacher. Synthetic integration rehearsal; no real person or testimonial.",
+      "portrait": {
+        "kind": "placeholder",
+        "key": "neutral-1"
+      },
+      "created_at": "2026-10-27T16:36:36.026Z"
+    },
+    "guestbook": [
+      {
+        "id": "6ae0d35d68075706584d76ff",
+        "display_name": "Ari North — synthetic guest",
+        "message": "Synthetic rehearsal: remembering Mira’s patience and shared garden.",
+        "created_at": "2026-10-27T16:37:49.931Z"
+      }
+    ],
+    "tributes": [
+      {
+        "id": "6ae0d38468075706584d7702",
+        "contributor_name": "Cai Brook — synthetic guest",
+        "relationship": "Fictional friend",
+        "content": "This is an invented remembrance: Mira welcomed me to the community garden when I knew nobody. She listened patiently and helped me plant beans. Sharing the work and the harvest made me feel that I belonged.",
+        "created_at": "2026-10-27T16:38:28.745Z"
+      },
+      {
+        "id": "6ae0d37868075706584d7701",
+        "contributor_name": "Bea Linden — synthetic guest",
+        "relationship": "Fictional neighbour",
+        "content": "In this fictional story, Mira shared tomatoes from her garden with the neighbours. She taught me how to care for seedlings and always brought an extra basket to share. Her kindness made our street feel welcoming.",
+        "created_at": "2026-10-27T16:38:16.705Z"
+      },
+      {
+        "id": "6ae0d36a68075706584d7700",
+        "contributor_name": "Ari North — synthetic guest",
+        "relationship": "Fictional student",
+        "content": "In this invented memory, Mira stayed after class to help me learn. She showed me how to try an experiment again and never made me feel ashamed of a mistake. Her patience gave me confidence.",
+        "created_at": "2026-10-27T16:38:02.081Z"
+      }
+    ],
+    "story": {
+      "id": "6ae0d4e701c49a30586b2914",
+      "title": "Mira Vale — patience and shared gardens",
+      "paragraphs": [
+        {
+          "text": "Mira was a patient teacher who stayed after class to help others learn. She showed how to try an experiment again and never made others feel ashamed of a mistake. Her patience gave people confidence.",
+          "source_tribute_ids": [
+            "6ae0d36a68075706584d7700"
+          ]
+        },
+        {
+          "text": "Mira shared tomatoes from her garden with her neighbors and taught others how to care for seedlings. She welcomed people to the community garden and helped them plant beans. Her kindness made the street feel welcoming and helped others feel that they belonged.",
+          "source_tribute_ids": [
+            "6ae0d38468075706584d7702",
+            "6ae0d37868075706584d7701"
+          ]
+        }
+      ],
+      "edited_by_organizer": true,
+      "ai": {
+        "model_id": "gemma-4-31b-it",
+        "provider_label": "Google AI Studio (Gemini API)"
+      },
+      "published_at": "2026-10-27T16:48:44.205Z"
+    }
+  }
+}

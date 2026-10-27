@@ -17,7 +17,7 @@
 | P3 | Codex | Atlas + Render provisioning | COMPLETE — free preview live; Atlas scoped access and Render runtime TLS ping verified |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | COMPLETE locally — PR #4 awaiting review; live Atlas lifecycle verified in P6 |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | COMPLETE locally — PR #5; Render GEMMA_* and provider reliability are P6 items |
-| P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
+| P6 | Codex | Frontend/API integration and production deploy | LIVE SMOKE PASSED — PR #6; independent P7 and owner-deferred key rotation pending |
 | P7 | Antigravity + owners | Independent browser E2E, UX, bugs, fixes | NOT STARTED |
 | P8 | Codex + Claude | Judge evidence, DEV article, submit | NOT STARTED |
 
@@ -218,15 +218,26 @@
   3. Show `story.ai.model_id` and `provider_label` with the published story.
 
 ## P6 — Integrate and deploy [CODEX, Claude supports backend bugs]
-- [ ] Replace mocked UI adapters with real typed APIs, preserving all branded UI states.
-- [ ] Confirm user cannot skip organizer review to publish.
-- [ ] Ensure sources open the exact approved tribute content; source IDs stay stable across edits/publish.
-- [ ] Build and deploy frontend/backend to Render; verify database persistence after redeploy.
-- [ ] Serve original logo, favicons, app metadata and 3D assets correctly under production URLs.
-- [ ] Add safe `/api/health` result; confirm Gemini-like mocks are disabled and actual Gemma runs.
-- [ ] Verify no API keys/recovery tokens exposed in client bundle or public GitHub.
-**Gate:** one complete live deployed journey works end-to-end, no manual DB hacks.
-**Evidence:** Live URL ___ | Build logs pass ___ | E2E rehearsal video ___
+- [x] Replace mocked production adapters with typed real APIs; preserve brand, mobile screens and R3F hall.
+- [x] Require organizer session and explicit review acknowledgment before UI publication; pending content remains private until server moderation.
+- [x] Citation dialogs open exact approved source tribute text; all published citation IDs validated against public approved response.
+- [x] Deploy frontend/backend on Render; verify contributions and published story/title/citations survive redeploy using Atlas.
+- [x] Verify original logo, favicon SVG/ICO, manifest/metadata and actual WebGL; functional explicit 2D fallback.
+- [x] Use Claude’s real /api/health; production mock demo disabled; real Gemma job generated and published source-linked draft.
+- [x] No configured key in compiled client asset scan or committed evidence; private fragment cleared and no token in public rendered text. Separate tool-output key exposure and owner-deferred rotation recorded below.
+**Gate:** PASSED live synthetic smoke. Independent P7 acceptance and the explicitly deferred provider-key rotation remain open; no production-readiness claim.
+**Evidence:** https://zemne-preview.onrender.com | Synthetic hall https://zemne-preview.onrender.com/m/mira-vale-synthetic-p6-rehearsal-kkr2i9 | Draft PR https://github.com/9jaDevo/zemne/pull/6 | Tested commit `85a4f6af3fc6431b647eb28b4e083ad4def4d107` | Render `dep-dbgdc6gu01pc73fjpspg` succeeded/live in 1m41s | `docs/evidence/p6` screenshots/JSON; no rehearsal video recorded.
+**Handoff to Antigravity:** `docs/P6_INTEGRATION_HANDOFF.md`; test final deployment independently in P7. No P7 implementation or submission work performed.
+
+### P6 handoff — Codex, October 27, 2026
+- **Prerequisites / scope:** read master/tracker/contract 1.2.0; P4’s MongoDB/security/moderation tests and P5’s real locally callable Gemma/source-backed draft gate passed before integration. Branch `codex/p6-live-integration`, stacked on `claude/p5-gemma-weaver`; PR #6 remains draft. No merge or earlier visual approval implied. Only P6 and summary row changed in this tracker.
+- **Implemented:** real HTTP client route shells /create, /m/[slug], /manage/[id]; one-time claim-link acknowledgment and discard; mount and same-tab fragment consumption/clearing before session exchange; approved public reads, pending guest forms, moderation, real background weave with long-running/resumed status and explicit retry, versioned edit, reviewed publish/unpublish, exact approved source dialogs and model/provider disclosure. Actual 3D raycast marker clicks opened each complete destination action. Original room/assets preserved; 2D mobile guestbook works. Dynamic shells and private/no-store, no-referrer/noindex headers; no local/session storage or client secret config.
+- **Render / secrets:** actual authorized signed-in Render dashboard used; no Render connector actions available. Existing FREE Virginia service `srv-dbg8g40m7kps73bnh6e0`, P6 branch, auto-deploy off. Build `npm ci --include=dev && npm run build`, startup infrastructure probe wrapper, health /api/health. Existing Atlas project/user/network unchanged. Backend MONGODB_URI/SESSION_SECRET/GEMMA_API_KEY securely configured. Endpoint Google AI Studio OpenAI-compatible URL, actual gemma-4-31b-it. No billing/paid changes. Masked hosting input initially failed to retain base/model; exact nonsecret values were corrected and real health/model call verified.
+- **Actual tests:** npm ci passed after stopping an existing project-local Next process that locked Windows SWC; lint zero warnings, typecheck, 12 files / 193 tests passed, 9 opt-in live tests skipped, production build passed. Final Linux CI passed https://github.com/9jaDevo/zemne/actions/runs/40544638130 and https://github.com/9jaDevo/zemne/actions/runs/40544629063. Exact configured key scan across 18 compiled client assets: zero matches. Protected backend/API/AI/shared-contract paths show no changes against P5.
+- **Actual hosted lifecycle:** create synthetic Mira Vale; one-time claim screen; submit one guestbook entry + 3 synthetic guest tributes via live UI. Public API returned 0/0/null while all four were pending. Approve through console → public 1/3/null. Genuine AI_UNAVAILABLE displayed explicit retry without draft before configuration was active. Real Gemma job then generated two paragraphs, resumed across reload, remained private as draft. Edit title, read original source, confirm review gate, publish. Public wall shows real model and exact original approved source; every source ID present in approved public tributes. Unpublish removed story; republish restored. Anonymous organizer API returned 401. Same-tab private-link edge case found, fixed, retested fragment clear + recovered console. Data survived two actual redeploys; final story ID/title/paragraphs/citations unchanged.
+- **Hosted evidence:** final source `85a4f6af3fc6431b647eb28b4e083ad4def4d107`; deployment `dep-dbgdc6gu01pc73fjpspg`, started 12:49:30 PM EDT, succeeded/live in 1m41s. Runtime MongoDB probe ok/expected role true; health database ok/AI configured. Actual 200 root/create/public/manage/favicon/manifest; private/no-store headers and no-referrer. JSON `hosted-checks.json`, `published-synthetic-lifecycle.json`, `final-deployment.json`; screenshots real error/retry, resumed generation, mobile hall/fallback, exact published source, final mobile wall and Render deployment. 390px no overflow, Canvas present, no mock preview/private token text; keyboard Escape closes source dialog. Temporary viewport reset.
+- **Security action / limitations:** hosting form snapshot accidentally exposed provider key in tool output. Owner informed, explicitly deferred rotation and instructed proceeding. Key must be revoked/replaced before sensitive use; no value in Git/client/evidence. Unpaid provider disclosure + synthetic-only notice remain visible. Three guest personas were submitted through real UI, not isolated cookie jars/networks. Physical devices/cross-browser/screen readers, forced WebGL-loss retest, full independent security/abuse/performance, two-network client-IP/rate-limit verification and video remain P7. No real private memorial data used; no readiness claim from builds alone.
+- **Files / contracts / next action:** frontend components/routes, Next headers/metadata, Render manifest, README, handoff and sanitized evidence only. Claude-owned models/APIs/auth/AI/shared contract/backend tests unchanged. Review PR #6 and run Antigravity independent P7 on the named live commit; create a fresh synthetic memorial, securely retain its private link, never screenshot secrets. P6 STOP.
 
 ## P7 — Independent browser QA + fixes [ANTIGRAVITY QA; CODEX/CLAUDE FIX]
 - [ ] Antigravity tests first-time organizer setup and private link recovery on fresh browser session.
