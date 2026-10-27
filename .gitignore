@@ -10,6 +10,8 @@ coverage/
 Thumbs.db
 .vercel/
 .codex/
+/AGENTS.md
+/docs/evidence/p2/qa-failure.txt
 *.pem
 *.key
 *.[zZ][iI][pP]

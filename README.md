@@ -2,8 +2,10 @@
 
 A place where memories live on.
 
-P0 foundation only. This is not a functioning memorial product or deployed demo.
-No API handlers, database integration, AI inference, brand assets or 3D scene exist yet.
+P2 frontend preview: original identity, a real React Three Fiber memorial hall,
+accessible 2D destinations and mobile-first guest/organizer screens. P1 supplies
+typed contracts and fictional fixtures. This is not a deployed memorial product:
+no real API handlers, database integration or AI inference exist yet.
 
 ## Authority
 
@@ -24,7 +26,10 @@ npm run build
 npm start
 ```
 
-Open http://localhost:3000. No credentials are required for the foundation page.
+Open http://localhost:3000. Visit `/demo` for the explicitly fictional, in-memory
+preview and `/identity` for the three original logo directions and icon proofs.
+The mock experience is disabled in production builds. It resets on reload and
+does not share data across browser sessions. Use fictional content only.
 `.env.example` intentionally contains variable names only; it is not a dotenv file.
 When backend setup begins, create an ignored `.env.local` with required `NAME=value`
 assignments using secure local tooling. Never expose these variables with `NEXT_PUBLIC_`.
@@ -35,14 +40,15 @@ assignments using secure local tooling. Never expose these variables with `NEXT_
 | --- | --- |
 | `src/app` excluding `api`, `src/components/ui`, `src/3d`, `public/brand`, `public/assets` | Codex frontend and visuals |
 | `src/server`, `src/lib/db`, `src/lib/ai`, `src/app/api`, `tests/backend` | Claude backend, no implementation in P0 |
-| `src/shared`, `fixtures`, `docs/API_CONTRACT.md` | Claude P1 types, runtime validation and synthetic fixtures |
+| `src/shared/api`, `src/shared/fixtures`, `docs/API_CONTRACT.md` | Claude P1 types, runtime validation and synthetic fixtures |
 | `tests/scaffold.test.ts`, root configuration, CI | Codex integration tooling |
 
-Claude P1: create a short feature branch from `main`; define API contracts, runtime
-schemas and shared types in `src/shared`, fictional fixtures in `fixtures`, and
-contract tests in `tests/backend`. Vitest discovers `tests/**/*.test.ts` and `.tsx`.
-Do not implement the full backend, change frontend/brand files or provision services.
-Do not begin P2 before the P1 gate passes. Use PRs and passing CI before integration.
+P1 contract and validation work is integrated. See `docs/API_CONTRACT.md`,
+`docs/BRAND_GUIDE.md` and `docs/P2_FRONTEND_HANDOFF.md` for the current interfaces,
+asset provenance, local preview, evidence and P6 wiring instructions. P2 screens
+consume `ZemneApiClient`; P6 replaces the development wrapper with real routes and
+`createHttpClient()` after the backend gates pass. Use PRs and passing CI before
+integration. P2 does not provision infrastructure or implement backend/AI logic.
 
 ## License and attribution
 

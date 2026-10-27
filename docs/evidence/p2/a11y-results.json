@@ -1,0 +1,86 @@
+{
+  "at": "2026-10-27T10:16:40.762Z",
+  "engine": "axe-core",
+  "audits": [
+    {
+      "width": 390,
+      "route": "/",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/identity",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?mode=2d",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?destination=guestbook",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?destination=tribute",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?destination=wall",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?view=create",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "route": "/demo?organizer-audit=1",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/identity",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?mode=2d",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?destination=guestbook",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?destination=tribute",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?destination=wall",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?view=create",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "route": "/demo?organizer-audit=1",
+      "violations": []
+    }
+  ]
+}
