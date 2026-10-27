@@ -76,6 +76,8 @@ export async function startTestServer() {
   }
 
   return {
+    /** Connection string, for tests that need an independent client. */
+    uri: replSet.getUri(),
     db,
     deps,
     call,

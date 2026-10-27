@@ -454,6 +454,29 @@ describe("stories: edit, publish, unpublish, citations", () => {
   });
 });
 
+describe("storage and restart behaviour", () => {
+  it("data and sessions survive a fresh connection (simulated process restart)", async () => {
+    const m = await newMemorial();
+    await submitAllPersonas(m.slug);
+    // New client + fresh deps object: nothing shared in memory with the "old process".
+    const { MongoClient } = await import("mongodb");
+    const fresh = new MongoClient(t.uri);
+    await fresh.connect();
+    try {
+      const restarted = { ...t.deps, db: async () => fresh.db(t.db.databaseName) };
+      const { run } = await import("../../src/server/http");
+      const req = new Request("https://zemne.test/api/x", { headers: { host: "zemne.test", cookie: m.cookie } });
+      const res = await run(getOrganizerMemorial, req, { id: m.id }, restarted, { write: false, route: "test" });
+      expect(res.status).toBe(200);
+      const view = OrganizerMemorialResponseSchema.parse(await res.json());
+      expect(view.counts.tributes.pending).toBe(3);
+      expect(view.memorial.slug).toBe(m.slug);
+    } finally {
+      await fresh.close();
+    }
+  });
+});
+
 describe("weave before P5", () => {
   it("requires approved tributes, then fails safely without storing anything", async () => {
     const m = await newMemorial();
