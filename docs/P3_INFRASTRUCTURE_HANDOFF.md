@@ -44,7 +44,7 @@ First deploy `dep-dbg8g48m7kps73bnh73g` failed because production npm installati
 
 | Name | Confirmed state | Next owner |
 | --- | --- | --- |
-| `MONGODB_URI` | Name exists on Render; owner secure URI entry pending confirmation/probe | P3 verifies access after entry |
+| `MONGODB_URI` | Name exists on Render; Owner saved value; format invalid, correction/probe pending | P3 verifies access after entry |
 | `SESSION_SECRET` | Nonempty cryptographically random value securely saved on Render | Claude consumes backend-only |
 | `GEMMA_API_BASE_URL` | Name exists, blank | Claude P5 selects actual provider |
 | `GEMMA_MODEL_ID` | Name exists, blank | Claude P5 selects actual Gemma model |
@@ -78,3 +78,7 @@ Rollback: retain known successful Render deploy `dep-dbg8k2d9fdbs73d3mc9g`; rest
 
 Latest startup deployment: dep-dbgb00sipgvc73f1ubkg, source be463f9, succeeded/live in 1m19s. Actual Render runtime probe: not_configured, expected_role_only false. Database access is still unverified pending secure URI entry.
 Remote Linux CI for be463f9 passed installation, lint, typecheck, 83 tests and build: https://github.com/9jaDevo/zemne/actions/runs/40517904603 and https://github.com/9jaDevo/zemne/actions/runs/40517895110.
+
+## URI follow-up — current gate
+
+Owner confirmed saving MONGODB_URI. Deployment `dep-dbgb2kqfngtc7397a6u0` from `23e9cf4f53b6282045561ffebe22f427451c4258` succeeded/live, but its actual Render runtime probe returned `invalid_or_unsafe_configuration`. This supersedes the historical missing-config result. Secure UI checks reported only booleans: a value exists and begins with the MongoDB scheme, but URL parsing fails. No value, raw exception, hostname or password was printed/copied/changed. Owner correction requested: use Atlas Connect → Drivers template, URL-encode password special characters, target `/zemne`, save in Render. P3 remains PARTIAL until authenticated hosting-network ping passes. This is a configuration gate, not evidence of an Atlas connectivity failure.

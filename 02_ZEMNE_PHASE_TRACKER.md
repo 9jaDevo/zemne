@@ -14,7 +14,7 @@
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
 | P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
 | P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
-| P3 | Codex | Atlas + Render provisioning | PARTIAL — free preview live, Atlas scoped user/network verified; secure URI and authenticated probe pending |
+| P3 | Codex | Atlas + Render provisioning | PARTIAL — free preview live, Atlas scoped user/network verified; URI format correction and authenticated probe pending |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
 | P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
@@ -125,6 +125,7 @@
 - **Files / contracts:** render.yaml, standalone scripts/infra probe/start wrapper, static provisioning page, ignored infrastructure tooling directory, handoff and sanitized evidence. Application dependencies/lockfile, blueprint/prompts, P1 API contract/shared schemas, Claude API/models/AI and backend tests unchanged. Neutral original art remains media strategy.
 - **Remaining gate / exact next action:** owner saves existing user's TLS URI with `/zemne` directly in Render MONGODB_URI, no value in chat. Restart/redeploy and verify sanitized `status: ok`, `expected_role_only: true` from Render runtime, then record deployment ID. Claude may consume SESSION_SECRET now; database acceptance must wait for probe. P5 Gemma settings remain pending. No later phase started.
 
+- **URI follow-up:** owner confirmed saving MONGODB_URI. Actual deploy `dep-dbgb2kqfngtc7397a6u0`, source `23e9cf4f53b6282045561ffebe22f427451c4258`, succeeded/live; runtime probe returned `invalid_or_unsafe_configuration`. Secure browser checks returned booleans only: value present, MongoDB scheme present, URI not parseable. Value was not displayed, copied or changed. Owner asked to replace it from Atlas Drivers with URL-encoded password and database `/zemne`; authenticated access remains blocked on configuration correction. Earlier `not_configured` result is historical. No additional permissions or network access requested.
 ## P4 — Core backend and moderation [CLAUDE]
 - [ ] Implement `memorials`, `guestbook_entries`, `tributes`, `story_drafts` collections and indexes.
 - [ ] Implement memorial creation with unique slug and high-entropy organizer secret; store hash only.
