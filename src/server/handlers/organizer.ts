@@ -278,6 +278,7 @@ async function runWeaveJob(
       model: story.model_id,
       latency_ms: result.latencyMs,
       attempts: result.attempts,
+      overload_retries: result.overloadRetries,
       tributes: sources.length,
       paragraphs: story.paragraphs.length,
       flags: story.flags.length,

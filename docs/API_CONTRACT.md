@@ -1,11 +1,13 @@
 # ZEMNE — API Contract
 
-**Contract version:** `1.2.0` (P5) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
+**Contract version:** `1.2.1` (P7 fixes) · **Owner:** Claude (backend) · **Consumers:** Codex (frontend), Antigravity (QA)
 **Authority:** `01_ZEMNE_MASTER_BLUEPRINT.md` §5–§8. This document turns that brief into exact routes, fields and rules.
 
 **Source of truth for types:** `src/shared/api/` (Zod schemas + TypeScript types). This document and those schemas must agree. `tests/backend/docs-examples.test.ts` checks every JSON example tagged `<!-- schema: X -->` below against schema `X`.
 
 > **Status (P5):** every route in §5 is implemented in `src/app/api` and backed by MongoDB. Memory Weaver calls a real Gemma model, measured in §6.3. §10 lists endpoint readiness and responses captured from the real handlers.
+>
+> **1.2.1 changes (P7):** no API shape changes. The weave job budget rose from 170 s to 220 s and the job deadline from 180 s to 230 s. Upstream overload is retried up to 3 times (3 s / 8 s / 15 s backoff) instead of once. The HTTP client waits up to 300 s instead of 240 s. These respond to the production QA weave that produced no draft within 240 s.
 >
 > **1.2.0 changes:** weave is now a **background job**. `POST …/weave` returns `202` with a job instead of `201` with a story, and the new `GET …/weave` reports the job (§5.13). `ZemneApiClient.weaveStory()` keeps its signature by polling, so existing UI code is unaffected. New client method `getWeaveStatus()`.
 >
@@ -454,7 +456,7 @@ Additional errors: `401`, `404` (unknown id, or one belonging to another memoria
 
 ### 5.13 `POST` and `GET /api/organizer/memorials/:id/weave` — Gemma Memory Weaver (background job)
 
-Real Gemma 4 latency on the configured provider is about **1–3 minutes** (§6.3), so weave runs as a **background job** rather than inside one HTTP request. This changed in 1.2.0.
+Real Gemma 4 latency on the configured provider is about **1–3 minutes**, and up to about 4 minutes with overload retries (§6.3), so weave runs as a **background job** rather than inside one HTTP request. This changed in 1.2.0.
 
 **`POST` — start a weave.** Request body: `{}` (`WeaveRequest`; no options).
 - The server collects **every currently approved tribute** of this memorial, oldest first, up to 40 tributes or 40,000 characters. Client-supplied tribute ids are not accepted.
@@ -506,17 +508,17 @@ Synchronous errors from `POST`, where no job is started:
 - `running`
 - `succeeded`: `story_id` and `story` are set.
 - `failed`, with `error.code` one of:
-  - `AI_TIMEOUT`: the 170 s model budget ran out, or the job was orphaned by a server restart and passed its 180 s deadline.
-  - `AI_UNAVAILABLE`: provider error or overload after one retry.
+  - `AI_TIMEOUT`: the 220 s model budget ran out, or the job was orphaned by a server restart and passed its 230 s deadline.
+  - `AI_UNAVAILABLE`: provider error, or still overloaded after up to 3 retries.
   - `AI_INVALID_OUTPUT`: unverifiable output after one repair attempt.
   - `INTERNAL`.
 
 On every failure **nothing is stored and no fallback or fake text is produced**; all of these are `retryable: true`.
 
 **Client behaviour:**
-- `ZemneApiClient.weaveStory(memorialId)` keeps its 1.0 signature. The HTTP client POSTs, polls `GET` every 4 s (up to 240 s), and resolves `{ story }` or rejects with a `ZemneApiError` carrying the job's error code. **UI code written against the mock needs no change.**
+- `ZemneApiClient.weaveStory(memorialId)` keeps its 1.0 signature. The HTTP client POSTs, polls `GET` every 4 s (up to 300 s), and resolves `{ story }` or rejects with a `ZemneApiError` carrying the job's error code. **UI code written against the mock needs no change.**
 - New `getWeaveStatus(memorialId)` lets the console resume a "Weaving…" state after a reload.
-- The UI must show a long-running state, e.g. "Weaving approved tributes with Gemma. This can take 1–3 minutes." It must not double-submit; a second POST gets `409 WEAVE_IN_PROGRESS`.
+- The UI must show a long-running state, e.g. "Weaving approved tributes with Gemma. This can take 1–4 minutes." It must not double-submit; a second POST gets `409 WEAVE_IN_PROGRESS`.
 
 <!-- schema: ApiErrorBody -->
 ```json
@@ -619,7 +621,7 @@ Passing validation means **the citations point at provided tributes. It does not
   - Gemma 4 returns its reasoning inline as `<thought>…</thought>`. The client strips it; an unterminated thought counts as no answer.
   - `max_tokens` is 6144 and `temperature` is 0.3.
 - `src/lib/ai/prompt.ts`: rules come before the data and are repeated after it. Tributes are embedded as escaped JSON inside a per-request random boundary (`<<<DATA_<18 hex>` … `DATA_<18 hex>>>>`), so a tribute cannot close the block or pose as instructions. Contributor names are never sent.
-- `src/lib/ai/weaver.ts`: runs the model, then `validateWeaveOutput`, then one repair attempt if the output is unverifiable. It retries once on upstream 429/500/502/503 overload. The budget is 170 s.
+- `src/lib/ai/weaver.ts`: runs the model, then `validateWeaveOutput`, then one repair attempt if the output is unverifiable. On upstream 429/500/502/503 overload it retries up to 3 times (3 s, 8 s, 15 s backoff), but only while at least 60 s of budget would remain for the call. Overload retries don't use up the repair attempt. The budget is 220 s. `weave_ok` and `weave_failed` logs record the number of overload retries.
 - `src/lib/ai/grounding.ts`: deterministic validator flags (`origin: "validator"`). They mark numbers or years and capitalised names that don't appear in a paragraph's cited tributes or the memorial fields, and paragraphs that share under 20% of their content words with their sources. Text is never rewritten; the organizer decides.
 
 ### 6.2 Model and provider (verified facts, 2026-10-27)
