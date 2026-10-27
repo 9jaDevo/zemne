@@ -13,7 +13,7 @@
 |---|---|---|---|
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
 | P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
-| P2 | Codex | Original branding and real 3D + screens | NOT STARTED |
+| P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
 | P3 | Codex | Atlas + Render provisioning | NOT STARTED |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
@@ -74,17 +74,28 @@
   - The full integration notes are in the contract §1–§9 and in the final P1 chat handoff.
 
 ## P2 — Brand and polished immersive frontend [CODEX]
-- [ ] Produce 3 independent custom logo concepts; select/refine one with recognizable icon plus editorial wordmark.
-- [ ] Export actual usable SVG primary/light/dark + icon, SVG/favicon.ico/PNG app icon sizes, and brand guide.
-- [ ] Test mark at 16, 32, 180 px and on light/dark backgrounds; no generic AI/death imagery.
-- [ ] Build actual React Three Fiber virtual hall geometry with architectural materials, portrait area and hotspots: guestbook, tribute, memory wall.
-- [ ] Implement mobile tap hotspots, graceful camera transitions, loading, return navigation, responsive framing.
-- [ ] Build fully functional 2D fallback UI; reduced-motion behavior; keyboard access and readable contrast.
-- [ ] Build create form, management link handoff, guestbook, tribute, memory wall, organizer console UI with typed mock fixtures.
-- [ ] Validate mobile 375/390 px and desktop screenshot; no fake backend success in real modes.
+- [x] Produce 3 independent custom logo concepts; select/refine one with recognizable icon plus editorial wordmark.
+- [x] Export actual usable SVG primary/light/dark + icon, SVG/favicon.ico/PNG app icon sizes, and brand guide.
+- [x] Test mark at 16, 32, 180 px and on light/dark backgrounds; no generic AI/death imagery.
+- [x] Build actual React Three Fiber virtual hall geometry with architectural materials, portrait area and hotspots: guestbook, tribute, memory wall.
+- [x] Implement mobile tap hotspots, graceful camera transitions, loading, return navigation, responsive framing.
+- [x] Build fully functional 2D fallback UI; reduced-motion behavior; keyboard access and readable contrast.
+- [x] Build create form, management link handoff, guestbook, tribute, memory wall, organizer console UI with typed mock fixtures.
+- [x] Validate mobile 375/390 px and desktop screenshot; no fake backend success in real modes.
 **Gate:** real WebGL hall and three working transitions available; all screens navigate; visual brand is approved.
-**Evidence:** PR ___ | 16px logo screenshot ___ | Mobile screenshot ___ | 3D demo clip ___
-**Handoff to Claude:** exact UI state/error variants requested.
+**Evidence:** https://github.com/9jaDevo/zemne/pull/2 | Implementation `fec09ccf24b7091c2bc64b4a5235eb14111da82c` | Logo proof `docs/evidence/p2/identity-desktop.png` (actual 16/32/180px) | Mobile `docs/evidence/p2/hall-mobile-375.png`, `hall-mobile-390.png` | Recording `docs/evidence/p2/hall-navigation.webm`.
+**Handoff to Claude:** `docs/P2_FRONTEND_HANDOFF.md`; contract v1.0.0 unchanged, typed `ZemneApiClient` consumed directly.
+
+### P2 handoff — Codex, October 27, 2026
+- **Phase / branch / PR:** P2 only; `codex/p2-brand-hall`; draft PR #2 for owner visual review. P1 PR #1 merged after its CI and all 83 local contract tests passed; no P1 files were modified by P2. Only this P2 section and its summary row were updated in the tracker.
+- **Brand:** three original vector directions (Held Space, Folded Continuum, Resonance); selected/refined Held Space with custom outlined lettering. Full primary/light/dark lockups, separate symbol/wordmark, SVG/ICO favicons, 16/32/180/192/512 PNGs, contact-sheet SVG/PNG, manifest/metadata and three original neutral landscape illustrations. `docs/BRAND_GUIDE.md` records evaluation, spacing, color, typography and provenance. Browser `/identity` proves light/dark and actual icon sizes. No stock logo/model/texture or real portrait used.
+- **3D / UI:** procedural stone/timber/brass hall with portrait recess, guestbook desk, tribute lectern and wall plaque; three numbered raycast-clickable markers and four bounded camera views. Demand rendering, DPR cap, one shadow map, loading/error boundaries, reduced-motion snaps, entrance control, mobile/keyboard buttons, explicit 2D mode and working WebGL/context-loss fallback. All requested screens use P1's typed in-memory adapter: create, fake private-link acknowledgment, guestbook/tribute receipts, approved wall with exact-source dialogs, organizer moderation, simulated weave, editing/citation selection, publish/unpublish.
+- **Real validation:** `npm run lint` (0 warnings), `npm run typecheck`, `npm test` (7 files / 83 tests), `npm run build` all passed. `scripts/p2-qa.cjs`: 16 browser checks passed, including physical WebGL marker clicks, pending isolation, moderation, edit/publish/source/unpublish, explicit AI error/retry, year validation/private-link acknowledgment, empty/2D states, reduced-motion keyboard activation, forced context loss and WebGL-disabled submission. No horizontal overflow at 375/390/768/1440px; no page errors and no API network requests. Asset parser/dimension/ICO checks passed.
+- **Accessibility evidence:** final `scripts/p2-a11y.cjs` pass reports zero violations across eight routes/states at 390 and 1440px (16 audits; axe WCAG 2 A/AA and 2.1 AA tags). Initial contrast/Canvas-label issues were corrected and retested. These are automated spot-checks, not accessibility certification or independent QA.
+- **Production boundary:** `/demo` is development-only; a local production `npm start` probe returned the truthful unavailable page, no fictional memorial content and `Referrer-Policy: no-referrer`. No mock endpoint or real AI/persistence claim. The in-memory demo resets on reload and cannot satisfy real multi-session acceptance. All visual evidence uses invented P1 data; claim screenshot contains a powerless mock token only.
+- **Files / evidence:** `src/3d`, `src/components`, frontend `src/app` files, `public/brand`, `public/assets`, icons/manifest, frontend configuration, README, `scripts` and the three P2 documents. Screenshots and JSON results under `docs/evidence/p2`; actual navigation `.webm` included. Detailed verification is `docs/P2_QA_NOTES.md`. Blueprint, agent prompts, shared API/fixtures, backend/API directories and backend tests unchanged.
+- **Incomplete gates / risks:** owner visual approval is still pending, so the visual approval portion of the gate is not marked satisfied. Physical iOS/Android, Safari/Firefox, screen readers, independent Antigravity QA, live API/auth, real Gemma, MongoDB persistence, hosted performance and the real cross-session lifecycle remain later gates. Project license approval remains pending from P0. No production-readiness, Lighthouse/FPS or deployment claim.
+- **Exact next handoff:** review `/identity`, `/demo` and the captured mobile/desktop evidence on PR #2 before merging. Do not reinterpret mock organizer access as security. P3 remains unstarted. Claude's later P4/P5 work must honor existing pending/public serialization, errors (`fields`, retry-after, 401, version/source conflicts), current-version story PATCH and rejected-source unpublish side effects. In P6, inject `createHttpClient()`, add real `/m/[slug]` and `/manage/[id]` route shells, and consume/clear fragment secrets before exchange; the development-only `/demo?...` links are not production invitation links. No contract revisions are requested by P2. STOP; no P3 or later work executed.
 
 ## P3 — GitHub + MongoDB Atlas + Render resources [CODEX]
 - [ ] Check installed GitHub/MongoDB Atlas/Render connector/browser capabilities and seek required owner approvals.
