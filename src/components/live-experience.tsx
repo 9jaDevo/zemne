@@ -76,6 +76,7 @@ export default function LiveExperience({
   const [twoD, setTwoD] = useState(false);
   const [notice, setNotice] = useState("");
   const [ready, setReady] = useState(!initialSlug && !initialId);
+  const [sessionEpoch, setSessionEpoch] = useState(0);
   const loadRef = useRef<Promise<void> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
@@ -121,6 +122,43 @@ export default function LiveExperience({
       active = false;
     };
   }, [api, initialId, initialSlug]);
+  useEffect(() => {
+    let active = true;
+    async function recoverFromFragment() {
+      let token = parseManageFragment(window.location.hash);
+      if (window.location.hash)
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      if (!initialId || !token) return;
+      setReady(false);
+      setNotice("");
+      try {
+        const exchange = api.exchangeOrganizerToken({
+          memorial_id: initialId,
+          token,
+        });
+        token = null;
+        await exchange;
+        if (active) {
+          setSessionEpoch((value) => value + 1);
+          setReady(true);
+        }
+      } catch {
+        if (active)
+          setNotice(
+            "Your private link could not be exchanged. Check your connection and reopen the saved link.",
+          );
+      }
+    }
+    window.addEventListener("hashchange", recoverFromFragment);
+    return () => {
+      active = false;
+      window.removeEventListener("hashchange", recoverFromFragment);
+    };
+  }, [api, initialId]);
   async function visitHall() {
     if (!slug && memorialId) {
       await action.run(async () => {
@@ -223,6 +261,7 @@ export default function LiveExperience({
         />
       ) : screen === "organizer" ? (
         <Organizer
+          key={sessionEpoch}
           api={api}
           memorialId={memorialId}
           onVisit={() => void visitHall()}

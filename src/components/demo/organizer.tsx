@@ -42,7 +42,11 @@ function StoryEditor({
       </p>
       <form
         onChange={(event) => {
-          if (event.target instanceof HTMLInputElement && event.target.name === "reviewed") return;
+          if (
+            event.target instanceof HTMLInputElement &&
+            event.target.name === "reviewed"
+          )
+            return;
           setDirty(true);
           setSaved("");
         }}

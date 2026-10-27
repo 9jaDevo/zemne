@@ -6,24 +6,23 @@ export default function ProvisioningPage() {
     <main className="page-message content-width">
       <Brand />
       <span className="eyebrow" style={{ marginTop: 40 }}>
-        Infrastructure preview
+        Infrastructure checkpoint
       </span>
       <h1>
-        A place is taking shape.
+        A place to begin.
         <br />
-        <em>The final demo is not live yet.</em>
+        <em>The demonstration has moved.</em>
       </h1>
       <p>
-        This page confirms only that the ZEMNE web application can serve a page.
-        Memorial creation, persistent storage and AI processing are not
-        available in this preview.
+        Open ZEMNE to create a synthetic memorial, invite contributions and
+        review a remembrance woven from approved tributes.
       </p>
       <p>
         A successful page load does not confirm database or AI connectivity.
         Please do not enter personal memorial information.
       </p>
       <Link href="/" className="button secondary">
-        View the design preview
+        Open ZEMNE
       </Link>
     </main>
   );
