@@ -12,13 +12,13 @@
 | Phase | Owner | Outcome | State |
 |---|---|---|---|
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
-| P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
-| P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
+| P1 | Claude | Backend/API contract and fixtures | INTEGRATED — contract 1.2.1; historical phase evidence below |
+| P2 | Codex | Original branding and real 3D + screens | INTEGRATED — Garden of Light candidate; device/live QA pending |
 | P3 | Codex | Atlas + Render provisioning | COMPLETE — free preview live; Atlas scoped access and Render runtime TLS ping verified |
-| P4 | Claude | Real persistence, organizer authorization and moderation APIs | COMPLETE locally — PR #4 awaiting review; live Atlas lifecycle verified in P6 |
-| P5 | Claude | Real Gemma Memory Weaver with evidence validation | COMPLETE locally — PR #5; Render GEMMA_* and provider reliability are P6 items |
-| P6 | Codex | Frontend/API integration and production deploy | LIVE SMOKE PASSED — PR #6; independent P7 and owner-deferred key rotation pending |
-| P7 | Antigravity + owners | Independent browser E2E, UX, bugs, fixes | NOT STARTED |
+| P4 | Claude | Real persistence, organizer authorization and moderation APIs | INTEGRATED — real persistence and organizer APIs; live retest pending |
+| P5 | Claude | Real Gemma Memory Weaver with evidence validation | INTEGRATED — real Gemma plus P7 reliability mitigation; provider capacity gate open |
+| P6 | Codex | Frontend/API integration and production deploy | INTEGRATED — historical live smoke passed; consolidated main not yet deployed |
+| P7 | Antigravity + owners | Independent browser E2E, UX, bugs, fixes | RETEST REQUIRED — owner fixes integrated; historical report discrepancies and new design gates open |
 | P8 | Codex + Claude | Judge evidence, DEV article, submit | NOT STARTED |
 
 ---
@@ -302,3 +302,9 @@
 - Open gates: physical iPhone/mid-range Android GPU/thermal measurements; browser endurance, forced context loss and OS reduced-motion validation; tablet/zoom sweep; live three-contribution creation→claim→approval→Gemma→edit→publish/source/persistence run on a deployed candidate. Local screenshots and tests do not complete those gates. Keep current Render revision until review and authorized deployment.
 
 Standard final npm test result: 203 passed, nine live tests skipped, one Claude-owned health-route import timeout at 5 seconds (BUG-P7-03). The longer-timeout diagnostic run passed 204; the default-command issue remains open.
+
+## Main consolidation — Codex (owner request, 2026-10-27)
+
+- Integrated all authored P1–P7 application branches and the Garden of Light redesign with original commit ancestry. Claude P7 source was merged unchanged in 9bb6aa1. Consolidation details and remaining submission gates: `docs/MAIN_INTEGRATION_HANDOFF.md`.
+- Historical Antigravity report and JSON evidence preserved; raw screenshots and local audit tooling are retained privately pending credential review. Its original tracker edits remain in the named local stash, rather than marking unverified current-main gates complete.
+- Validation and remote merge evidence will be recorded after required checks pass. No deployment or submission is implied.

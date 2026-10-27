@@ -1,0 +1,134 @@
+{
+  "testSuite": "End-to-End Multi-Persona Memorial Walkthrough",
+  "targetUrl": "https://zemne-preview.onrender.com",
+  "startTime": "2026-10-27T17:19:00.407Z",
+  "steps": [
+    {
+      "name": "Dr. Alistair Finch — Synthetic P7 mvqy9rsi",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:06.859Z",
+      "memorialId": "6ae0dd0a9649b502b4d1220d",
+      "memorialSlug": "dr-alistair-finch-synthetic-p7-mvqy9rsi-urdrs6"
+    },
+    {
+      "name": "Organizer Console Handoff",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:07.963Z",
+      "urlWithoutSecret": "https://zemne-preview.onrender.com/manage/6ae0dd0a9649b502b4d1220d",
+      "notes": "Fragment secret stripped from address bar immediately"
+    },
+    {
+      "name": "Guest Persona 1 Guestbook Submission & Isolation",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:18.033Z",
+      "contributor": "Dr. Marcus Vance",
+      "approvedCountInPublicView": 0
+    },
+    {
+      "name": "Guest Persona 2 Tribute Submission & Isolation",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:26.553Z",
+      "contributor": "Sarah Jenkins",
+      "approvedCountInPublicView": 0
+    },
+    {
+      "name": "All Guest Tributes Submitted",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:40.216Z",
+      "totalGuestbookSubmitted": 1,
+      "totalTributesSubmitted": 3
+    },
+    {
+      "name": "Organizer Moderation",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:19:55.212Z",
+      "pendingRemaining": "00",
+      "approvedTributes": "03"
+    },
+    {
+      "name": "End-to-End Walkthrough",
+      "status": "FAIL",
+      "timestamp": "2026-10-27T17:23:55.498Z",
+      "error": "locator.waitFor: Timeout 240000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('h3:has-text(\\'Give the words your care.\\')') to be visible\u001b[22m\n",
+      "stack": "locator.waitFor: Timeout 240000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('h3:has-text(\\'Give the words your care.\\')') to be visible\u001b[22m\n\n    at C:\\xampp\\htdocs\\Project\\zemne\\scripts\\qa\\e2e-walkthrough.cjs:309:77"
+    }
+  ],
+  "artifacts": [
+    {
+      "filename": "e2e-01-create-page.png",
+      "description": "Memorial creation form",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-01-create-page.png"
+    },
+    {
+      "filename": "e2e-02-create-filled.png",
+      "description": "Form filled with synthetic details",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-02-create-filled.png"
+    },
+    {
+      "filename": "e2e-03-claim-screen.png",
+      "description": "Save Private Link handoff screen",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-03-claim-screen.png"
+    },
+    {
+      "filename": "e2e-04-organizer-initial.png",
+      "description": "Organizer initial console (0 pending, 0 approved)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-04-organizer-initial.png"
+    },
+    {
+      "filename": "e2e-05-guest1-hall-entrance.png",
+      "description": "Guest 1 enters 3D hall",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-05-guest1-hall-entrance.png"
+    },
+    {
+      "filename": "e2e-06-guest1-guestbook-empty.png",
+      "description": "Guestbook initially empty for visitors",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-06-guest1-guestbook-empty.png"
+    },
+    {
+      "filename": "e2e-07-guest1-guestbook-form.png",
+      "description": "Guest 1 filled guestbook form",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-07-guest1-guestbook-form.png"
+    },
+    {
+      "filename": "e2e-08-guest1-guestbook-receipt.png",
+      "description": "Guest 1 submission receipt (pending isolation notice)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-08-guest1-guestbook-receipt.png"
+    },
+    {
+      "filename": "e2e-09-guest2-tribute-form.png",
+      "description": "Guest 2 filled tribute form (Theme: field mentorship & patience)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-09-guest2-tribute-form.png"
+    },
+    {
+      "filename": "e2e-10-guest2-tribute-receipt.png",
+      "description": "Guest 2 submission receipt",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-10-guest2-tribute-receipt.png"
+    },
+    {
+      "filename": "e2e-11-guest3-tribute-form.png",
+      "description": "Guest 3 filled tribute form (Theme: cedar whistles & storytelling)",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-11-guest3-tribute-form.png"
+    },
+    {
+      "filename": "e2e-12-guest-wall-unapproved.png",
+      "description": "Memory wall before organizer publication",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-12-guest-wall-unapproved.png"
+    },
+    {
+      "filename": "e2e-13-organizer-pending-queue.png",
+      "description": "Organizer console with 4 pending items",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-13-organizer-pending-queue.png"
+    },
+    {
+      "filename": "e2e-14-organizer-all-approved.png",
+      "description": "Organizer console: 0 pending, 3 approved tributes",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-14-organizer-all-approved.png"
+    },
+    {
+      "filename": "e2e-15-weave-in-progress.png",
+      "description": "Weave in progress banner",
+      "path": "C:\\xampp\\htdocs\\Project\\zemne\\docs\\evidence\\p7\\e2e-15-weave-in-progress.png"
+    }
+  ],
+  "endTime": "2026-10-27T17:23:55.498Z"
+}

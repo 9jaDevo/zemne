@@ -1,0 +1,103 @@
+{
+  "testSuite": "Security, Frontend Secrets Leakage & Auth Isolation Audit",
+  "targetUrl": "https://zemne-preview.onrender.com",
+  "startTime": "2026-10-27T17:28:50.863Z",
+  "checks": [
+    {
+      "name": "Client JS Bundle Secrets Scan",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:28:55.058Z",
+      "bundlesScannedCount": 12,
+      "scannedBundles": [
+        {
+          "bundle": "/_next/static/chunks/2r4s4h5xul1n-.js",
+          "size": 28739,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/216iyidhmrh3u.js",
+          "size": 229597,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/2e268anpfvdoc.js",
+          "size": 168355,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/turbopack-3-ry682tkyiqk.js",
+          "size": 10030,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/0umf92h1sb77c.js",
+          "size": 13820,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/2ndj58dzmfrp9.js",
+          "size": 4763,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/1c9py7_sida9s.js",
+          "size": 28460,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/0cz1d0mv5g_q7.js",
+          "size": 112541,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/1ckvzn7sfprko.js",
+          "size": 5582,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/1-_nj23tg7nuw.js",
+          "size": 8702,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/33rnoeqpenmht.js",
+          "size": 151173,
+          "clean": true
+        },
+        {
+          "bundle": "/_next/static/chunks/1-ng1xtih7qlz.js",
+          "size": 22522,
+          "clean": true
+        }
+      ]
+    },
+    {
+      "name": "Public API Data Serialization Privacy",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:28:55.320Z",
+      "slug": "mira-vale-synthetic-p6-rehearsal-kkr2i9",
+      "noOwnerTokens": true,
+      "noInternalMetadata": true
+    },
+    {
+      "name": "Organizer Auth Isolation (Anonymous & Invalid Access)",
+      "status": "PASS",
+      "timestamp": "2026-10-27T17:28:57.164Z",
+      "anonSessionStatus": 401,
+      "anonMemorialStatus": 401,
+      "anonWeaveStatus": 401,
+      "anonModerationStatus": 401,
+      "malformedTokenStatus": 400,
+      "wrongTokenStatus": 401
+    },
+    {
+      "name": "Security & Auth Audit",
+      "status": "FAIL",
+      "timestamp": "2026-10-27T17:29:05.708Z",
+      "error": "Created Memorial A\n\n429 !== 201\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Created Memorial A\n\n429 !== 201\n\n    at C:\\xampp\\htdocs\\Project\\zemne\\scripts\\qa\\test-security-auth.cjs:242:12\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+    }
+  ],
+  "findings": [],
+  "endTime": "2026-10-27T17:29:05.708Z"
+}
