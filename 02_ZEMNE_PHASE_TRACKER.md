@@ -12,7 +12,7 @@
 | Phase | Owner | Outcome | State |
 |---|---|---|---|
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
-| P1 | Claude | Backend/API contract and fixtures | NOT STARTED |
+| P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
 | P2 | Codex | Original branding and real 3D + screens | NOT STARTED |
 | P3 | Codex | Atlas + Render provisioning | NOT STARTED |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
@@ -46,15 +46,32 @@
 - **Exact Claude P1 handoff:** fetch/pull latest `main` from `https://github.com/9jaDevo/zemne.git`; create a short feature branch, e.g. `claude/p1-contracts`. Re-read master/tracker. Author `docs/API_CONTRACT.md`; own runtime schemas/types in `src/shared`, sanitized fictional memorial/three-persona fixtures in `fixtures`, validation tests in `tests/backend/*.test.ts`. Use imports from `@/shared/...` in app code. Vitest discovers `tests/**/*.test.{ts,tsx}` with Node environment; configure any test import aliases if needed. Choose/install runtime validation in P1; it is deliberately not predefined in P0. Specify all route/error/state, secret-fragment exchange, scoped cookie/expiry, CSRF/origin, moderation, rate-limit and source-linked Gemma JSON contracts required by the P1 prompt. Do not implement full APIs, alter Codex frontend/brand/3D, provision resources or begin P2. Run lint/typecheck/test/build, update only P1, and return commit/PR plus exact type/fixture integration paths.
 
 ## P1 — Data types and HTTP contracts [CLAUDE]
-- [ ] Create `docs/API_CONTRACT.md` with endpoints, error shapes, auth/permission model and JSON fixtures.
-- [ ] Define memorial, pending guestbook, pending tribute, approved contributions, story draft types with status enums.
-- [ ] Define token exchange + cookie session rules, rate limit and CSRF approach.
-- [ ] Define Gemma input/output JSON contract and model-error response.
-- [ ] Add contract validation tests and fixture seed for fictitious memorial + three fabricated guests.
-- [ ] Ensure no direct UI or cloud changes in this phase.
+- [x] Create `docs/API_CONTRACT.md` with endpoints, error shapes, auth/permission model and JSON fixtures. (18 tagged JSON examples, each validated by `tests/backend/docs-examples.test.ts`)
+- [x] Define memorial, pending guestbook, pending tribute, approved contributions, story draft types with status enums. (`src/shared/api/schemas.ts`, `state.ts`)
+- [x] Define token exchange + cookie session rules, rate limit and CSRF approach. (contract §2–§3)
+- [x] Define Gemma input/output JSON contract and model-error response. (contract §6, `src/shared/api/weave.ts`; AI errors 502/503/504)
+- [x] Add contract validation tests and fixture seed for fictitious memorial + three fabricated guests. (`src/shared/fixtures/`, 83 tests)
+- [x] Ensure no direct UI or cloud changes in this phase. (diff touches only `docs/API_CONTRACT.md`, `src/shared/**`, `tests/backend/**`, `package.json`/lock for `zod`, and this tracker)
 **Gate:** Codex can implement UI from contract, even if backend is a mock.
-**Evidence:** PR ___ | Files ___ | Test results ___
+**Evidence:** PR https://github.com/9jaDevo/zemne/pull/1 (branch `claude/p1-api-contract`, commit `0b022a6`) | Files: `docs/API_CONTRACT.md`, `src/shared/api/*`, `src/shared/fixtures/*`, `tests/backend/*.test.ts` | Test results (2026-10-27, local Windows, Node 24.11.1): `npm test` 7 files / 83 tests passed; `npm run typecheck` clean; `npm run lint` 0 warnings; `npm run build` passed
 **Handoff to Codex:** API fields/events/states/fixtures and mock adapter expectations.
+
+### P1 handoff (Claude → Codex, 2026-10-27)
+- **Phase / agent:** P1 / Claude
+- **Commit or PR:** https://github.com/9jaDevo/zemne/pull/1 (`0b022a6` + tracker commit)
+- **Implemented:** contract v1.0.0. Covers 14 routes; the fragment token → `__Host-zemne_org` cookie flow (HttpOnly, Secure, SameSite=Strict, 12 h); SHA-256 token hash; CSRF/origin rules; rate limits; moderation and story state machines; public allowlist serialization; the Gemma weave I/O contract and validator; the error model. Also typed Zod schemas, a reference HTTP client, a synthetic fixture and the DEMO mock client.
+- **Real commands/tests executed and results:** `npm test` (83/83 pass), `npm run typecheck`, `npm run lint`, `npm run build`: all pass.
+- **Evidence links/screenshots:** n/a (no UI in P1).
+- **Incomplete items/blockers:**
+  - No API routes are implemented; that is P4/P5.
+  - P4 must verify Render's `X-Forwarded-For`/`X-Forwarded-Host` behaviour for rate-limit keys and the origin check.
+  - Rotate-token is in the contract; P4 implements it.
+- **Files/API contracts changed:** new `docs/API_CONTRACT.md`, `src/shared/api/`, `src/shared/fixtures/`, `tests/backend/`; `zod` added as a dependency.
+- **Recommended next action (Codex, P2):**
+  - Import types and schemas from `@/shared/api` and fixtures and the mock from `@/shared/fixtures`.
+  - Code every screen against the `ZemneApiClient` interface using `createMockClient()`, and show a visible DEMO badge while `client.isDemo`.
+  - In P6, swap to `createHttpClient()`. No other UI change should be needed.
+  - The full integration notes are in the contract §1–§9 and in the final P1 chat handoff.
 
 ## P2 — Brand and polished immersive frontend [CODEX]
 - [ ] Produce 3 independent custom logo concepts; select/refine one with recognizable icon plus editorial wordmark.
