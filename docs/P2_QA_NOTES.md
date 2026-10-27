@@ -18,6 +18,9 @@ This is Codex's implementation verification, not Antigravity's independent P7 au
 | Asset validation | SVGs parse via Sharp; PNG dimensions 16/32/180/192/512 exact; ICO header verified |
 
 The full records are `docs/evidence/p2/qa-results.json` and `a11y-results.json`.
+Linux CI also passed at tooling commit `9cac185`: install, lint, typecheck, test and
+build, https://github.com/9jaDevo/zemne/actions/runs/40488122360. The same checks run
+on Codex preview-branch pushes as well as pull requests; no deployment action exists.
 An automated accessibility pass does not certify accessibility or replace manual
 assistive-technology testing.
 
