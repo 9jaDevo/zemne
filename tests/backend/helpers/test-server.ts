@@ -44,9 +44,10 @@ export async function startTestServer() {
   let now = new Date(START);
 
   const deps: ServerDeps = {
-    config: { mongodbUri: "mongodb://test", sessionSecret: TEST_SECRET, production: true, gemmaConfigured: false },
+    config: { mongodbUri: "mongodb://test", sessionSecret: TEST_SECRET, production: true, gemmaConfigured: false, gemma: null },
     db: async () => db,
     now: () => new Date(now),
+    gemma: null,
   };
 
   async function call(handler: Handler, opts: CallOptions = {}): Promise<CallResult> {
@@ -89,6 +90,7 @@ export async function startTestServer() {
     },
     async reset() {
       now = new Date(START);
+      deps.gemma = null;
       await Promise.all(Object.values(COLLECTIONS).map((name) => db.collection(name).deleteMany({})));
     },
     async stop() {

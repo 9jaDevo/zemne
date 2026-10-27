@@ -142,7 +142,10 @@ describe("configuration", () => {
   it("requires a long session secret and reads only backend env names", () => {
     expect(readConfig({ SESSION_SECRET: "short", NODE_ENV: "production" } as NodeJS.ProcessEnv).sessionSecret).toBeNull();
     const cfg = readConfig({ SESSION_SECRET: SECRET, MONGODB_URI: " mongodb+srv://h/zemne ", NODE_ENV: "production" } as NodeJS.ProcessEnv);
-    expect(cfg).toEqual({ mongodbUri: "mongodb+srv://h/zemne", sessionSecret: SECRET, production: true, gemmaConfigured: false });
+    expect(cfg).toEqual({ mongodbUri: "mongodb+srv://h/zemne", sessionSecret: SECRET, production: true, gemmaConfigured: false, gemma: null });
+    const g = readConfig({ GEMMA_API_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai/", GEMMA_MODEL_ID: "gemma-3-27b-it", GEMMA_API_KEY: " k ", NODE_ENV: "test" } as NodeJS.ProcessEnv);
+    expect(g.gemma).toEqual({ baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai", modelId: "gemma-3-27b-it", apiKey: "k" });
+    expect(g.gemmaConfigured).toBe(true);
   });
 
   it("uses the URI database name, defaulting to zemne", () => {

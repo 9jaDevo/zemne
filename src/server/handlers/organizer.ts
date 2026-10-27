@@ -1,6 +1,6 @@
 /**
  * Organizer handlers: session exchange, owner view, rotation, moderation,
- * weave (P5 placeholder that fails safely) and story edit/publish.
+ * Gemma weave and story edit/publish.
  */
 import { ObjectId } from "mongodb";
 import {
@@ -20,7 +20,9 @@ import {
   type OrganizerSessionResponse,
   type RotateTokenResponse,
   type StoryUpdateResponse,
+  type WeaveResponse,
 } from "../../shared/api";
+import { WeaveError, weaveRemembrance, type WeaveResult } from "../../lib/ai/weaver";
 import { collections, type Collections } from "../../lib/db/schema";
 import type { StoryDraftDoc, StoryParagraphDoc } from "../../lib/db/types";
 import { assertMemorialScope, enforceRate, requireOrganizer } from "../auth";
@@ -180,20 +182,101 @@ export const moderateTribute: Handler = async (ctx) => {
   return { status: 200, body };
 };
 
+/** Most approved tributes (oldest first) and characters sent to the model per weave. */
+export const WEAVE_MAX_TRIBUTES = 40;
+export const WEAVE_MAX_CHARS = 40_000;
+const WEAVE_LOCK_MS = 90_000;
+
 /**
- * Weave (P5 implements generation). Until a real Gemma provider is wired in,
- * this fails safely with AI_UNAVAILABLE after the auth and precondition checks;
- * it never stores or returns placeholder text.
+ * Weave: approved tributes only -> real Gemma -> validated draft (never published).
+ * Without a configured endpoint, or on any AI failure, nothing is stored and no
+ * substitute text is produced.
  */
 export const weave: Handler = async (ctx) => {
   parseBody(WeaveRequestSchema, await readJson(ctx.request));
   const c = collections(await ctx.deps.db());
   const auth = await requireOrganizer(ctx, c);
   assertMemorialScope(auth, ctx.params.id);
-  await enforceRate(c, RATE_RULES.weaveMemorial, auth.session.mid, ctx.deps.now());
-  const approved = await c.tributes.countDocuments({ memorial_id: auth.memorial._id, status: "approved" }, { limit: 1 });
-  if (approved === 0) throw new HttpError("NO_APPROVED_TRIBUTES");
-  throw new HttpError("AI_UNAVAILABLE");
+  const mid = auth.memorial._id;
+  const now = ctx.deps.now();
+  await enforceRate(c, RATE_RULES.weaveMemorial, auth.session.mid, now);
+
+  const approved = await c.tributes
+    .find({ memorial_id: mid, status: "approved" }, { projection: { _id: 1, content: 1 } })
+    .sort({ created_at: 1, _id: 1 })
+    .limit(WEAVE_MAX_TRIBUTES)
+    .toArray();
+  if (approved.length === 0) throw new HttpError("NO_APPROVED_TRIBUTES");
+  const client = ctx.deps.gemma;
+  if (!client) throw new HttpError("AI_UNAVAILABLE");
+
+  let chars = 0;
+  const sources = approved
+    .filter((t) => (chars += t.content.length) <= WEAVE_MAX_CHARS)
+    .map((t) => ({ id: t._id.toHexString(), content: t.content }));
+
+  const lockUntil = new Date(now.getTime() + WEAVE_LOCK_MS);
+  const locked = await c.memorials.findOneAndUpdate(
+    { _id: mid, $or: [{ weave_lock_until: { $exists: false } }, { weave_lock_until: null }, { weave_lock_until: { $lte: now } }] },
+    { $set: { weave_lock_until: lockUntil } },
+  );
+  if (!locked) throw new HttpError("WEAVE_IN_PROGRESS");
+
+  let result: WeaveResult;
+  try {
+    result = await weaveRemembrance(
+      client,
+      {
+        name: auth.memorial.name,
+        birth_year: auth.memorial.birth_year,
+        death_year: auth.memorial.death_year,
+        description: auth.memorial.description,
+      },
+      sources,
+    );
+  } catch (error) {
+    if (error instanceof WeaveError) {
+      // Safe operational log: code + coarse detail only, never prompt/output text.
+      console.warn(JSON.stringify({ event: "weave_failed", request_id: ctx.requestId, code: error.code, detail: error.detail }));
+      throw new HttpError(error.code);
+    }
+    throw error;
+  } finally {
+    await c.memorials.updateOne({ _id: mid, weave_lock_until: lockUntil }, { $set: { weave_lock_until: null } });
+  }
+
+  const created = ctx.deps.now();
+  const story: StoryDraftDoc = {
+    _id: new ObjectId(),
+    memorial_id: mid,
+    status: "draft", // the AI never publishes
+    version: 1,
+    title: result.draft.title,
+    paragraphs: result.draft.paragraphs.map((p) => ({ text: p.text, source_tribute_ids: p.source_tribute_ids.map((id) => new ObjectId(id)) })),
+    flags: result.draft.flags.map((f) => ({ ...f, source_tribute_ids: f.source_tribute_ids.map((id) => new ObjectId(id)) })),
+    input_tribute_ids: sources.map((s) => new ObjectId(s.id)),
+    model_id: result.modelId.slice(0, 120),
+    provider_label: result.providerLabel.slice(0, 120),
+    edited_by_organizer: false,
+    created_at: created,
+    updated_at: created,
+    published_at: null,
+  };
+  await c.stories.insertOne(story);
+  console.info(
+    JSON.stringify({
+      event: "weave_ok",
+      request_id: ctx.requestId,
+      model: story.model_id,
+      latency_ms: result.latencyMs,
+      attempts: result.attempts,
+      tributes: sources.length,
+      paragraphs: story.paragraphs.length,
+      flags: story.flags.length,
+    }),
+  );
+  const body: WeaveResponse = { story: toStoryView(story) };
+  return { status: 201, body };
 };
 
 /** Every cited id must be a currently approved tribute of this memorial. */

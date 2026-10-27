@@ -26,6 +26,8 @@ export interface MemorialDoc {
   visibility: "unlisted";
   created_at: Date;
   updated_at: Date;
+  /** Set while a weave is running; prevents concurrent weaves (expires on its own). */
+  weave_lock_until?: Date | null;
 }
 
 interface ContributionBase {
