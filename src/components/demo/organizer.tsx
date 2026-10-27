@@ -10,6 +10,7 @@ import { ErrorNotice, Field } from "@/components/ui/form";
 import { Icon } from "@/components/ui/icon";
 import { SourceDialog } from "./guest-panels";
 import { useAction } from "./use-action";
+import { WeaveProgress } from "@/components/ui/weave-progress";
 
 function StoryEditor({
   story,
@@ -222,6 +223,7 @@ export function Organizer({
   const [selected, setSelected] = useState("");
   const [message, setMessage] = useState("");
   const [weaving, setWeaving] = useState(false);
+  const [weaveStartedAt, setWeaveStartedAt] = useState<string | null>(null);
   const [weaveError, setWeaveError] = useState("");
   const action = useAction();
   const refresh = useCallback(async () => {
@@ -253,6 +255,7 @@ export function Organizer({
         const { job } = await api.getWeaveStatus(memorialId);
         if (!active) return;
         setWeaving(job?.status === "running");
+        setWeaveStartedAt(job?.status === "running" ? job.started_at : null);
         if (job?.status === "failed")
           setWeaveError(
             job.error?.message ??
@@ -480,11 +483,8 @@ export function Organizer({
               </p>
             </div>
             <ErrorNotice message={weaveError} />
-            {weaving && (
-              <p role="status">
-                Weaving approved tributes with Gemma. This can take 1–3 minutes.
-                You can return to this console to check progress.
-              </p>
+            {weaving && weaveStartedAt && (
+              <WeaveProgress startedAt={weaveStartedAt} />
             )}
             <button
               className="button primary full"
@@ -493,6 +493,7 @@ export function Organizer({
                 void action.run(async () => {
                   setWeaveError("");
                   setWeaving(true);
+                  setWeaveStartedAt(new Date().toISOString());
                   try {
                     const result = await api.weaveStory(memorialId);
                     setSelected(result.story.id);

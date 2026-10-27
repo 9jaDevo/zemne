@@ -60,7 +60,9 @@ export function GuestPanel({
 }) {
   const action = useAction();
   const [receipt, setReceipt] = useState("");
-  const [writing, setWriting] = useState(kind === "tribute");
+  const [writing, setWriting] = useState(
+    kind === "tribute" && data.tributes.length === 0,
+  );
   const isBook = kind === "guestbook";
   if (receipt)
     return (
