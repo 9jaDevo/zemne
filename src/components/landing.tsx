@@ -1,163 +1,177 @@
-"use client";
-import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Brand } from "@/components/brand";
 import { Icon } from "@/components/ui/icon";
-import { useReducedMotion } from "@/components/ui/use-reduced-motion";
-const HallScene = dynamic(() => import("@/3d/hall-scene"), {
-  ssr: false,
-  loading: () => <div className="scene-loading">Opening the architecture…</div>,
-});
+
+const places = [
+  {
+    key: "guestbook",
+    number: "01",
+    title: "A few words. A lasting presence.",
+    label: "The guestbook",
+    text: "Let the people who loved them know you were here. Every message is held for the organizer’s care.",
+  },
+  {
+    key: "tribute",
+    number: "02",
+    title: "The stories only you can tell.",
+    label: "The tribute lectern",
+    text: "An ordinary afternoon. An unexpected kindness. Bring a memory into a place where it can be shared.",
+  },
+  {
+    key: "wall",
+    number: "03",
+    title: "A life, seen through many eyes.",
+    label: "The memory wall",
+    text: "Approved memories become a shared remembrance, woven with Gemma and reviewed by a person, always.",
+  },
+];
 export function Landing() {
-  const router = useRouter();
-  const reducedMotion = useReducedMotion();
   return (
-    <>
-      <header className="site-header landing-header">
+    <div className="sanctuary-site">
+      <header className="sanctuary-header">
         <Link href="/" aria-label="ZEMNE home">
-          <Brand />
+          <Brand light />
         </Link>
         <nav aria-label="Main navigation">
-          <a className="text-button about-link" href="#how-it-works">
-            A place for remembering
-          </a>
-          <a className="button secondary small" href="/create">
-            Create a memorial
-            <Icon name="arrow" size={16} />
-          </a>
+          <Link className="sanctuary-header-link" href="/experience">
+            Explore the experience
+          </Link>
+          <Link className="button sanctuary-header-cta" href="/create">
+            Create a memorial <Icon name="arrow" size={16} />
+          </Link>
         </nav>
       </header>
       <main>
-        <section className="landing-hero content-width">
-          <div className="hero-copy">
-            <span className="eyebrow">
-              <span className="tiny-line" />
-              Together, in remembrance
-            </span>
+        <section className="sanctuary-hero">
+          <Image
+            src="/3d/sanctuary-entrance-v1.webp"
+            alt="The actual ZEMNE sanctuary: limestone, warm oak, soft daylight and a framed memorial at the end of a quiet aisle"
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className="sanctuary-hero-shade" />
+          <div className="sanctuary-hero-copy">
+            <span className="eyebrow">A place for the people we carry</span>
             <h1>
-              For the stories
+              Some lives
               <br />
-              that <em>stay.</em>
+              stay <em>with us.</em>
             </h1>
             <p>
-              A quiet place to gather. To share the little things.
-              <br className="desktop-break" /> And to keep a life present,
-              wherever you are.
+              A beautiful place to gather their stories.
+              <br />
+              And feel a little closer, wherever you are.
             </p>
-            <a className="button primary" href="/create">
-              Create a memorial
-              <Icon name="arrow" />
-            </a>
-            <p className="hero-disclaimer">
-              Synthetic demonstration · real storage and Gemma
-            </p>
-            <div className="hero-note">
-              <span className="note-line" />
-              <p>
-                Some people leave a place in us.
-                <br />
-                This is a place for them.
-              </p>
+            <div className="sanctuary-hero-actions">
+              <Link className="button sanctuary-light-button" href="/create">
+                Create a memorial <Icon name="arrow" />
+              </Link>
+              <Link className="sanctuary-explore-link" href="/experience">
+                <span>↗</span> Explore the experience
+              </Link>
             </div>
           </div>
-          <div className="hero-scene">
-            <div className="hero-scene-label">
-              <span className="eyebrow">A first glimpse inside</span>
-              <span className="pill">INTERACTIVE 3D</span>
-            </div>
-            <div className="hero-canvas">
-              <HallScene
-                reducedMotion={reducedMotion}
-                view="overview"
-                onSelect={() => router.push("/create")}
-              />
-            </div>
-            <div className="hero-memorial">
-              <div>
-                <span className="eyebrow">Your memorial begins here</span>
-                <h2>
-                  A place for their story<span>Made together</span>
-                </h2>
-              </div>
-              <a
-                className="round-button"
-                href="/create"
-                aria-label="Create a memorial"
-              >
-                <Icon name="arrow" />
-              </a>
-            </div>
-            <span className="hero-scene-footnote">
-              ORIGINAL ARCHITECTURE · THREE PLACES TO CONNECT
+          <div className="sanctuary-hero-caption">
+            <span>THE GARDEN OF LIGHT</span>
+            <span>
+              An original ZEMNE sanctuary
+              <br />
+              Enter the real interactive room
             </span>
           </div>
         </section>
-        <section id="how-it-works" className="how-section">
-          <div className="content-width">
-            <div className="how-heading">
-              <span className="eyebrow">A remembrance, made together</span>
-              <h2>
-                Small gestures.
-                <br />
-                <em>Something lasting.</em>
-              </h2>
-              <p>
-                No distance is too far for a memory.
-                <br />
-                Three simple ways to be present.
-              </p>
-            </div>
-            <div className="how-grid">
-              {[
-                {
-                  icon: "book" as const,
-                  title: "Leave your presence.",
-                  text: "A few thoughtful words in the guestbook. A reminder that you were here.",
-                  number: "01",
-                },
-                {
-                  icon: "pen" as const,
-                  title: "Share your memory.",
-                  text: "The ordinary moments that made them extraordinary. Told by the people who knew them.",
-                  number: "02",
-                },
-                {
-                  icon: "wall" as const,
-                  title: "Keep their story close.",
-                  text: "A shared remembrance, drawn from approved tributes and cared for by the organizer.",
-                  number: "03",
-                },
-              ].map((item) => (
-                <article key={item.number}>
-                  <div className="how-top">
-                    <Icon name={item.icon} size={28} />
-                    <span>{item.number}</span>
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
-                </article>
-              ))}
-            </div>
-            <div className="preview-disclosure">
-              <span className="status-dot" />
-              <p>
-                Synthetic demonstration with real storage and Gemma. Use
-                invented details only.{" "}
-                <a href="/create">
-                  Begin a memorial
-                  <Icon name="arrow" size={14} />
-                </a>
-              </p>
+        <section className="sanctuary-intro content-width">
+          <span className="eyebrow">Distance changes. Connection remains.</span>
+          <div>
+            <h2>
+              A place to remember.
+              <br />
+              <em>A way to be together.</em>
+            </h2>
+            <p>
+              Not every goodbye happens in the same room. ZEMNE brings the
+              people who knew them into one thoughtful place—through a few
+              words, a shared memory, and the story you hold together.
+            </p>
+            <div className="sanctuary-process">
+              <span>
+                <b>01</b> Create their space
+              </span>
+              <span>
+                <b>02</b> Invite your people
+              </span>
+              <span>
+                <b>03</b> Keep their stories close
+              </span>
             </div>
           </div>
         </section>
+        <section className="sanctuary-places">
+          <div className="sanctuary-section-heading content-width">
+            <span className="eyebrow">Three ways to be present</span>
+            <h2>
+              Small gestures.
+              <br />
+              <em>Something lasting.</em>
+            </h2>
+          </div>
+          <div className="sanctuary-place-grid content-width">
+            {places.map((p) => (
+              <article key={p.key}>
+                <Link
+                  className="sanctuary-place-image"
+                  href={`/experience?destination=${p.key}`}
+                  aria-label={`Explore ${p.label}`}
+                >
+                  <Image
+                    src={`/3d/sanctuary-${p.key}-v1.webp`}
+                    alt={`A modeled view of ${p.label} inside ZEMNE’s sanctuary`}
+                    fill
+                    sizes="(max-width: 760px) 100vw, 33vw"
+                  />
+                  <span>
+                    {p.number} / {p.label}
+                  </span>
+                </Link>
+                <h3>{p.title}</h3>
+                <p>{p.text}</p>
+                <Link
+                  className="sanctuary-text-link"
+                  href={`/experience?destination=${p.key}`}
+                >
+                  Step inside <Icon name="arrow" size={16} />
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+        <section className="sanctuary-final">
+          <span className="eyebrow">Their story deserves a place</span>
+          <h2>
+            Begin with a name.
+            <br />
+            <em>The memories will follow.</em>
+          </h2>
+          <p>
+            No guest accounts. No public directory.
+            <br />
+            Share an unlisted link. Publish only approved memories.
+          </p>
+          <Link href="/create" className="button sanctuary-light-button">
+            Create a memorial <Icon name="arrow" />
+          </Link>
+          <small>
+            Public demonstration · please use invented details only.
+          </small>
+        </section>
       </main>
-      <footer className="site-footer">
+      <footer className="site-footer sanctuary-footer">
         <Brand />
         <p>A place where memories live on.</p>
-        <span>Thoughtfully made for the people we carry.</span>
+        <span>Made with care. Shared with permission.</span>
       </footer>
-    </>
+    </div>
   );
 }

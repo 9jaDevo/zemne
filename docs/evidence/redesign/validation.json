@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-27",
+  "branch": "codex/sanctuary-redesign",
+  "production_deployed": false,
+  "lint": "passed",
+  "typecheck": "passed",
+  "full_tests": {
+    "command": "npm test -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=120000",
+    "passed": 204,
+    "skipped_live": 9,
+    "failed": 0
+  },
+  "initial_test_run": "165 passed; cold route import timed out and MongoMemory startup exceeded its internal 10-second limit during concurrent rendering. Backend/config unchanged. Single-worker rerun passed.",
+  "frontend_regressions": {
+    "passed": 11,
+    "failed": 0
+  },
+  "model_bytes": 876964,
+  "environment_bytes": 1615248,
+  "triangles": 60449,
+  "mesh_primitives": 22,
+  "physical_phone_gpu_measured": false,
+  "browser": {
+    "viewports": [
+      "375x812",
+      "390x844",
+      "1440x1000"
+    ],
+    "mobile_document_client_width": 375,
+    "mobile_document_scroll_width": 375,
+    "hero_create_target_height": 48,
+    "hero_explore_target_height": 44,
+    "object_clicks": [
+      "guestbook",
+      "tribute",
+      "wall"
+    ],
+    "mobile_synthetic_tribute": "pending receipt; development fixture, not a live DB/AI test",
+    "approved_fixture_source_dialog": "opened, Escape dismissed",
+    "manual_2d": "guestbook panel and all destination controls preserved",
+    "forced_context_loss": "not tested",
+    "os_reduced_motion": "implementation retained; physical OS test pending",
+    "receipt_focus": "verified receipt heading focused after successful synthetic submission",
+    "return_to_sanctuary": "verified room restored and visual container focused",
+    "organizer_and_creation": "mobile screens inspected"
+  },
+  "existing_public_showcase_api": {
+    "http": 200,
+    "approved_tributes": 3,
+    "published_story_present": true
+  },
+  "backend_owned_files_changed": false,
+  "notes": "Historical before captures and current local after captures are distinct. This record does not renew live P6/P7 acceptance or claim photorealistic performance on phones.",
+  "standard_tests": {
+    "command": "npm test",
+    "passed": 203,
+    "skipped_live": 9,
+    "failed": 1,
+    "failure": "Cold health-route import exceeded 5000ms (5446ms); BUG-P7-03"
+  },
+  "build": "passed"
+}

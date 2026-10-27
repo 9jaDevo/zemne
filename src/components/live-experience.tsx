@@ -59,16 +59,18 @@ const destinations: {
 export default function LiveExperience({
   slug: initialSlug,
   memorialId: initialId,
+  initialDestination = "overview",
 }: {
   slug?: string;
   memorialId?: string;
+  initialDestination?: Destination;
 }) {
   const [api] = useState(() => createHttpClient());
   const router = useRouter();
   const [screen, setScreen] = useState<
     "hall" | "create" | "claim" | "organizer"
   >(initialId ? "organizer" : initialSlug ? "hall" : "create");
-  const [view, setView] = useState<Destination>("overview");
+  const [view, setView] = useState<Destination>(initialDestination);
   const [data, setData] = useState<PublicMemorialResponse | null>(null);
   const [slug, setSlug] = useState(initialSlug ?? "");
   const [memorialId, setMemorialId] = useState(initialId ?? "");
@@ -79,6 +81,7 @@ export default function LiveExperience({
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const loadRef = useRef<Promise<void> | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const action = useAction();
   useEffect(() => {
@@ -173,6 +176,13 @@ export default function LiveExperience({
   }
   function selectDestination(destination: Destination) {
     setView(destination);
+    if (destination === "overview" && window.innerWidth <= 760) {
+      visualRef.current?.focus({ preventScroll: true });
+      visualRef.current?.scrollIntoView({
+        behavior: reducedMotion ? "instant" : "smooth",
+        block: "start",
+      });
+    }
     if (destination !== "overview")
       requestAnimationFrame(() => {
         panelRef.current?.focus({ preventScroll: true });
@@ -292,8 +302,11 @@ export default function LiveExperience({
                 {twoD ? "Switch to 3D hall" : "Use the 2D view"}
               </button>
             </div>
-            <div className={`hall-layout ${twoD ? "two-d" : ""}`}>
-              <div className="hall-visual">
+            <div
+              className={`hall-layout ${twoD ? "two-d" : ""}`}
+              data-destination={view}
+            >
+              <div className="hall-visual" ref={visualRef} tabIndex={-1}>
                 {twoD ? (
                   <div className="two-d-art">
                     <Image
@@ -332,7 +345,8 @@ export default function LiveExperience({
                       </button>
                     )}
                     <div className="scene-hint">
-                      Tap the brass markers, or choose a destination below.
+                      Select the guestbook, lectern or memory wall, or use the
+                      controls below.
                     </div>
                   </>
                 )}
@@ -364,6 +378,12 @@ export default function LiveExperience({
                 tabIndex={-1}
                 aria-label="Selected memorial destination"
               >
+                <button
+                  className="panel-return"
+                  onClick={() => selectDestination("overview")}
+                >
+                  ← Return to the sanctuary
+                </button>
                 {view === "overview" ? (
                   <section className="destination-panel welcome-panel">
                     <span className="eyebrow">You are welcome here</span>

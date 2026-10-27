@@ -76,6 +76,7 @@ export default function DemoExperience() {
   const [notice, setNotice] = useState("");
   const [demoFeedback, setDemoFeedback] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const action = useAction();
   useEffect(() => {
@@ -140,6 +141,13 @@ export default function DemoExperience() {
   }
   function selectDestination(destination: Destination) {
     setView(destination);
+    if (destination === "overview" && window.innerWidth <= 760) {
+      visualRef.current?.focus({ preventScroll: true });
+      visualRef.current?.scrollIntoView({
+        behavior: reducedMotion ? "instant" : "smooth",
+        block: "start",
+      });
+    }
     if (destination !== "overview")
       requestAnimationFrame(() => {
         panelRef.current?.focus({ preventScroll: true });
@@ -249,8 +257,11 @@ export default function DemoExperience() {
                 {twoD ? "Switch to 3D hall" : "Use the 2D view"}
               </button>
             </div>
-            <div className={`hall-layout ${twoD ? "two-d" : ""}`}>
-              <div className="hall-visual">
+            <div
+              className={`hall-layout ${twoD ? "two-d" : ""}`}
+              data-destination={view}
+            >
+              <div className="hall-visual" ref={visualRef} tabIndex={-1}>
                 {twoD ? (
                   <div className="two-d-art">
                     <Image
@@ -289,7 +300,8 @@ export default function DemoExperience() {
                       </button>
                     )}
                     <div className="scene-hint">
-                      Tap the brass markers, or choose a destination below.
+                      Select the guestbook, lectern or memory wall, or use the
+                      controls below.
                     </div>
                   </>
                 )}
@@ -321,6 +333,12 @@ export default function DemoExperience() {
                 tabIndex={-1}
                 aria-label="Selected memorial destination"
               >
+                <button
+                  className="panel-return"
+                  onClick={() => selectDestination("overview")}
+                >
+                  ← Return to the sanctuary
+                </button>
                 {view === "overview" ? (
                   <section className="destination-panel welcome-panel">
                     <span className="eyebrow">You are welcome here</span>

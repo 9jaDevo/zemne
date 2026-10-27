@@ -1,0 +1,21 @@
+{
+  "model": "sanctuary-mobile.glb",
+  "source": "scripts/3d/build-sanctuary.py",
+  "architecture": "Original ZEMNE Garden of Light sanctuary",
+  "blender": "4.5.15 LTS",
+  "optimizer": "glTF Transform 4.5.1 / Meshopt / WebP",
+  "bytes": 876964,
+  "sha256": "0c68f4b4cd2c9928c16f4d134c3ba70ee3e6c9ac9ccb4806da4c4884e67b2a60",
+  "mesh_objects": 22,
+  "primitives": 22,
+  "triangles": 60449,
+  "embedded_images": 9,
+  "destinations": [
+    "guestbook",
+    "tribute",
+    "wall"
+  ],
+  "portrait": "Original neutral abstract relief, not a real person",
+  "baked_lighting": false,
+  "physical_mobile_gpu_tested": false
+}

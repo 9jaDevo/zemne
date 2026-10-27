@@ -64,6 +64,10 @@ export function GuestPanel({
     kind === "tribute" && data.tributes.length === 0,
   );
   const isBook = kind === "guestbook";
+  const receiptRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (receipt) receiptRef.current?.focus();
+  }, [receipt]);
   if (receipt)
     return (
       <section
@@ -74,7 +78,7 @@ export function GuestPanel({
           <Icon name="check" size={28} />
         </span>
         <span className="eyebrow">Held with care</span>
-        <h2 id="receipt-heading" tabIndex={-1}>
+        <h2 id="receipt-heading" tabIndex={-1} ref={receiptRef}>
           Your words are
           <br />
           <em>in good hands.</em>
