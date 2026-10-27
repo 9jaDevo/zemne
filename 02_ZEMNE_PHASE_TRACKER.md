@@ -16,7 +16,7 @@
 | P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
 | P3 | Codex | Atlas + Render provisioning | COMPLETE — free preview live; Atlas scoped access and Render runtime TLS ping verified |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | COMPLETE locally — PR #4 awaiting review; live Atlas lifecycle verified in P6 |
-| P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
+| P5 | Claude | Real Gemma Memory Weaver with evidence validation | COMPLETE locally — PR #5; Render GEMMA_* and provider reliability are P6 items |
 | P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
 | P7 | Antigravity + owners | Independent browser E2E, UX, bugs, fixes | NOT STARTED |
 | P8 | Codex + Claude | Judge evidence, DEV article, submit | NOT STARTED |
@@ -172,15 +172,50 @@
   - **Claude (P5):** Gemma weave.
 
 ## P5 — Real Gemma Memory Weaver [CLAUDE]
-- [ ] Configure and verify real inference endpoint for an open-weight Gemma model; document exact model/version/provider/license.
-- [ ] Build source-only grounded draft generation from approved tributes; JSON-schema parse/validate.
-- [ ] Reject unknown source IDs, malformed payloads and claims without evidence; flag low-confidence or unsupported content for review.
-- [ ] Ensure AI never auto-publishes; editable organizer draft.
-- [ ] Tests with 3 synthetic tributes + absent data + prompt injection + wrong source ID + service failure.
-- [ ] Record actual generated example, latency and evaluation notes without inventing benchmark results.
-**Gate:** deployed/locally callable Gemma endpoint returns real source-backed draft and fails safely.
-**Evidence:** Model ID ___ | Actual run trace ___ | Tests ___ | Latency ___
+- [x] Configure and verify real inference endpoint for an open-weight Gemma model; document exact model/version/provider/license. (Google AI Studio OpenAI-compatible endpoint; `gemma-4-31b-it` v001; weights `google/gemma-4-31B-it`, Apache-2.0. Contract §6.2. Configured locally only, via the owner's key in ignored `.env.local`.)
+- [x] Build source-only grounded draft generation from approved tributes; JSON-schema parse/validate. (`src/lib/ai/*`; approved tributes only, under aliases; `validateWeaveOutput` + one repair attempt)
+- [x] Reject unknown source IDs, malformed payloads and claims without evidence; flag low-confidence or unsupported content for review. (unknown/duplicate citations dropped and flagged; uncited paragraphs removed; invalid JSON → `AI_INVALID_OUTPUT`; grounding flags for numbers/names absent from sources; model flags preserved)
+- [x] Ensure AI never auto-publishes; editable organizer draft. (stored as `draft` only; publish stays the P4 organizer PATCH with source checks)
+- [x] Tests with 3 synthetic tributes + absent data + prompt injection + wrong source ID + service failure. (unit + integration with a scripted test double; also opt-in live tests against the real model)
+- [x] Record actual generated example, latency and evaluation notes without inventing benchmark results. (`docs/evidence/p5/`, contract §6.3; failures recorded as observed)
+**Gate:** deployed/locally callable Gemma endpoint returns real source-backed draft and fails safely. **Met locally**: a real end-to-end weave through the HTTP job API produced a source-backed draft (64.7 s); upstream failures ended as retryable job errors with nothing stored. Not yet deployed (P6).
+**Evidence:** Model ID `gemma-4-31b-it` (as reported by endpoint responses) | Run traces `docs/evidence/p5/e2e-weave-2026-10-27T16-17-40Z.json`, `gemma-live-eval-gemma-4-31b-it-2026-10-27T16-16-14-224Z.json`, `gemma-live-eval-gemma-4-26b-a4b-it-2026-10-27T16-01-44-661Z.json` | Tests: `npm test` 193 passed, 9 skipped (the opt-in live tests, run separately), plus typecheck, lint and build | Latency: 7 completed weaves at 61.0–152.1 s model time (median 112.0 s); 6 of 13 attempts failed with upstream 500/503 "high demand". PR https://github.com/9jaDevo/zemne/pull/5
 **Handoff to Codex:** generator API response schema and loading/error UI behavior.
+
+### P5 handoff (Claude → Codex, 2026-10-27)
+- **Phase / agent:** P5 / Claude. Branch `claude/p5-gemma-weaver` is stacked on `claude/p4-backend` (PR #4 → #3 → #2). PR #5 targets `claude/p4-backend`. Merge order: #2, #3, #4, #5.
+- **Implemented:**
+  - Real Memory Weaver: `src/lib/ai/{gemma-client,prompt,weaver,grounding}.ts`, with the weave job handlers in `src/server/handlers/organizer.ts`.
+  - The model is `gemma-4-31b-it` on Google AI Studio's OpenAI-compatible endpoint. Gemma 3 is not served there (404); verified live.
+- **Contract 1.2.0 (the one behaviour change):**
+  - Weave is a background job. `POST /api/organizer/memorials/:id/weave` → **202** `{job}`; `GET` on the same path → `{job, story}`.
+  - `ZemneApiClient.weaveStory()` is unchanged for UI code; the HTTP client polls internally.
+  - New `getWeaveStatus(memorialId)` lets the console resume a running weave after reload.
+- **Real commands/tests executed and results:**
+  - `npm test` 193 passed, 9 skipped (live).
+  - Live runs: `node --env-file=.env.local node_modules/vitest/vitest.mjs run tests/backend/gemma-live.test.ts` with `ZEMNE_LIVE_GEMMA=1`.
+  - End-to-end: production `next start`, local MongoDB, real Gemma.
+  - All results are in contract §6.3 and `docs/evidence/p5/`.
+- **Incomplete items/blockers:**
+  1. **Provider reliability:** today 6 of 13 real weaves failed with upstream 500/503 "high demand" on the unpaid tier. The failures were safe, but the demo should be rehearsed and timed, and a paid or billing-enabled key considered.
+  2. **Privacy:** on the unpaid tier Google may use prompts and outputs to improve its products. Use synthetic data only until the key is on a paid tier. Show the provider disclosure (`story.ai.provider_label`) in the UI.
+  3. Evaluation run A's file was overwritten. Its numbers come from that run's console output and are labelled that way in contract §6.3. Evidence files are now timestamped.
+- **Files/API contracts changed:**
+  - `docs/API_CONTRACT.md` 1.2.0
+  - `src/shared/api/{schemas,client}.ts` (`WeaveJob`, `WeaveStartResponse`, `WeaveStatusResponse`, polling `weaveStory`, `getWeaveStatus`)
+  - `src/shared/fixtures/mock-client.ts` (`getWeaveStatus`)
+  - `src/server/{config,deps}.ts`, `src/lib/db/types.ts` (`weave_job`), and the weave route's new `GET`
+  - tests and evidence
+- **Recommended next action (Codex, P6):**
+  1. In Render, set `GEMMA_API_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai` and `GEMMA_MODEL_ID=gemma-4-31b-it`, and have the owner enter `GEMMA_API_KEY` securely. Keep the Render service a long-lived web service: background jobs need it, and serverless won't work.
+  2. Weave UI:
+     - show a "Weaving approved tributes with Gemma. This can take 1–3 minutes." state;
+     - disable the button while running;
+     - on load, call `getWeaveStatus()` to resume;
+     - show `AI_*` failures with a retry and no substitute text;
+     - show model flags beside paragraphs and validator flags as review prompts;
+     - never label AI text as verified.
+  3. Show `story.ai.model_id` and `provider_label` with the published story.
 
 ## P6 — Integrate and deploy [CODEX, Claude supports backend bugs]
 - [ ] Replace mocked UI adapters with real typed APIs, preserving all branded UI states.
