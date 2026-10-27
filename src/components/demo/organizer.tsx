@@ -41,7 +41,8 @@ function StoryEditor({
         never a verified account.
       </p>
       <form
-        onChange={() => {
+        onChange={(event) => {
+          if ((event.target as HTMLInputElement).name === "reviewed") return;
           setDirty(true);
           setSaved("");
         }}
@@ -134,6 +135,7 @@ function StoryEditor({
         <label className="checkbox">
           <input
             type="checkbox"
+            name="reviewed"
             checked={reviewed}
             onChange={(e) => setReviewed(e.target.checked)}
           />
