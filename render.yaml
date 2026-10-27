@@ -1,5 +1,5 @@
-# P3 deployment candidate only. No Render service has been created from this file.
-# Confirm the workspace and region, then supply actual values through Render.
+# P3 specification for manually provisioned zemne-preview (not Blueprint-managed).
+# Do not apply as a new Blueprint without reconciling the existing service.
 services:
   - type: web
     name: zemne-preview
@@ -9,7 +9,7 @@ services:
     repo: https://github.com/9jaDevo/zemne
     branch: codex/p3-infrastructure
     autoDeployTrigger: off
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start -- --hostname 0.0.0.0
     healthCheckPath: /provisioning
     envVars:
