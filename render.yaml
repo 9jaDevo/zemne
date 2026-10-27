@@ -1,0 +1,31 @@
+# P3 deployment candidate only. No Render service has been created from this file.
+# Confirm the workspace and region, then supply actual values through Render.
+services:
+  - type: web
+    name: zemne-preview
+    runtime: node
+    plan: free
+    region: virginia
+    repo: https://github.com/9jaDevo/zemne
+    branch: codex/p3-infrastructure
+    autoDeployTrigger: off
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --hostname 0.0.0.0
+    healthCheckPath: /provisioning
+    envVars:
+      - key: NODE_VERSION
+        value: 24.11.1
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: GEMMA_API_BASE_URL
+        sync: false
+      - key: GEMMA_MODEL_ID
+        sync: false
+      - key: GEMMA_API_KEY
+        sync: false
