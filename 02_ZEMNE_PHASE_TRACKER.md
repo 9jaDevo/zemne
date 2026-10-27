@@ -14,7 +14,7 @@
 | P0 | Codex | New public repository and tooling | COMPLETE (license selection pending owner approval) |
 | P1 | Claude | Backend/API contract and fixtures | COMPLETE — PR #1 awaiting Codex merge |
 | P2 | Codex | Original branding and real 3D + screens | IMPLEMENTED — PR #2; owner visual approval pending |
-| P3 | Codex | Atlas + Render provisioning | NOT STARTED |
+| P3 | Codex | Atlas + Render provisioning | BLOCKED — Atlas organization policy / Render authentication; local preparation validated |
 | P4 | Claude | Real persistence, organizer authorization and moderation APIs | NOT STARTED |
 | P5 | Claude | Real Gemma Memory Weaver with evidence validation | NOT STARTED |
 | P6 | Codex | Frontend/API integration and production deploy | NOT STARTED |
@@ -100,17 +100,30 @@
 - **Exact next handoff:** review `/identity`, `/demo` and the captured mobile/desktop evidence on PR #2 before merging. Do not reinterpret mock organizer access as security. P3 remains unstarted. Claude's later P4/P5 work must honor existing pending/public serialization, errors (`fields`, retry-after, 401, version/source conflicts), current-version story PATCH and rejected-source unpublish side effects. In P6, inject `createHttpClient()`, add real `/m/[slug]` and `/manage/[id]` route shells, and consume/clear fragment secrets before exchange; the development-only `/demo?...` links are not production invitation links. No contract revisions are requested by P2. STOP; no P3 or later work executed.
 
 ## P3 — GitHub + MongoDB Atlas + Render resources [CODEX]
-- [ ] Check installed GitHub/MongoDB Atlas/Render connector/browser capabilities and seek required owner approvals.
+- [x] Check installed GitHub/MongoDB Atlas/Render connector/browser capabilities and seek required owner approvals.
 - [ ] Create MongoDB Atlas project/cluster and least-privileged app credentials; restrict access consistent with feasible Render connectivity.
 - [ ] Provision Render web service (can be initially placeholder) connected to the new public repo.
 - [ ] Keep secrets only in ignored local config or Render secure environment; never commit/share raw URI or keys.
-- [ ] Set backend environment name contract: `MONGODB_URI`, `SESSION_SECRET`, `GEMMA_API_BASE_URL`, `GEMMA_MODEL_ID`, optional `GEMMA_API_KEY`.
-- [ ] Provision persistent image storage only if portrait upload is included; otherwise use built-in placeholder art.
+- [x] Set backend environment name contract: `MONGODB_URI`, `SESSION_SECRET`, `GEMMA_API_BASE_URL`, `GEMMA_MODEL_ID`, optional `GEMMA_API_KEY`. Declared in the unapplied deployment candidate; no values configured on Render.
+- [x] Provision persistent image storage only if portrait upload is included; otherwise use built-in placeholder art. Neutral original placeholders retained; no upload/storage resource approved or provisioned.
 - [ ] Verify network connectivity and least-privilege access using a safe backend-only test.
 - [ ] Record service names/regions/URLs without disclosing secret values.
 **Gate:** Claude receives non-secret connection instructions; secrets provisioned securely, deployment route works.
-**Evidence:** Atlas cluster ID (redacted) ___ | Render URL ___ | Access test ___
-**Handoff to Claude:** env variable names, connection capability and failure notes.
+**Evidence:** Preparation commit `18d2cb2dbc1f3a85f23d7a8ed828ba82a5360987` | Atlas project/cluster ID: unavailable (policy denies discovery) | Render service ID/region/URL: unverified (sign-in required; no resource created) | DB access: NOT VERIFIED, probe `not_configured`.
+**Handoff to Claude:** `docs/P3_INFRASTRUCTURE_HANDOFF.md`; all five variable names declared, all values absent locally and not set on Render by this run. Do not begin DB-dependent acceptance on the basis of this preparation.
+
+### P3 execution and blocked handoff — Codex, October 27, 2026
+- **Branch / scope:** `codex/p3-infrastructure`, stacked on unmerged P2 branch `codex/p2-brand-hall`; P2 PR #2 remains draft. No P2 approval, merge or production release implied. Only P3 and its summary row changed in this tracker.
+- **GitHub:** actual CLI lookup confirms `https://github.com/9jaDevo/zemne`, PUBLIC, default branch `main`; authorized GitHub access available.
+- **Atlas actual blocker:** organization and project discovery both returned: “MCP access is disabled for every MongoDB Atlas organization this user belongs to (1 total), so no Atlas data is reachable over MCP. Retrying or re-authenticating will not change this.” Connector requires an Organization Owner to enable AI-client access. No further Atlas action or bypass attempted. Org/project/cluster IDs, regions, DB users, network/TLS settings and database reachability cannot currently be inspected. Nothing provisioned or changed.
+- **Atlas owner action:** review Organization Settings → App Connections and the desired AI-client access mode. This is an organization-wide setting for AI clients as a group, not just this chat. User confirmation/access enablement requested; still pending. Official instructions are linked in the handoff.
+- **Render actual blocker:** plugin discovery returns Render `installed: false`; no Render action tools available. Browser opening `https://dashboard.render.com` reaches `/login`, showing empty sign-in fields. The integration option was surfaced and sign-in/workspace/free-only selection requested. Browser sign-in page is retained for handoff; screenshot `docs/evidence/p3/render-signin-required.png`. No service/workspace selected, no billing or permission grant accepted, no deployment or secret-setting action performed.
+- **Prepared, not applied:** `render.yaml` proposes a free Node web service `zemne-preview`, Virginia region, current P3 branch, manual deployment, `npm ci && npm run build`, `npm run start -- --hostname 0.0.0.0`, Node 24.11.1 and temporary `/provisioning` page-serving check. Proposed Atlas pairing is AWS US_EAST_1. Neither region nor name is an actual provisioned resource. All five backend names declared; `SESSION_SECRET` would be Render-generated and other values use secure dashboard input. Gemma settings remain unselected; do not invent values to satisfy Blueprint prompts. No paid instance, persistent disk or image-storage resource added.
+- **Local configuration:** presence-only checks show all five backend variables absent and no `.env`, `.env.local` or `.env.production`. No URI/password/key/session secret generated, printed or committed. Optional probe dependencies isolated under ignored `.infra-tools`; no application dependencies changed or driver installed.
+- **Standalone probe:** `scripts/infra/probe-mongodb.mjs` performs a TLS-enforced authenticated ping plus effective-role check for `readWrite` on `zemne`; no models, collections, writes or HTTP routes. Raw errors and URIs are suppressed. It has not connected to MongoDB. Actual missing-config run returned sanitized `not_configured`, exit 2; a test URI with TLS disabled was rejected before connection as `invalid_or_unsafe_configuration`, exit 2. These are failure-path checks, not DB reachability evidence.
+- **Actual validation:** `node --check` passes; deployment YAML parsed and checked for free plan, automatic deployment off and required variable names. `npm run lint` (zero warnings), `npm run typecheck`, `npm test` (7 files / 83 tests) and `npm run build` passed. Local production `GET /provisioning` returned 200 with “final demo is not live yet” and explicit no-DB/AI-health claim. `GET /api/health` remains 404; Claude's API was not implemented or modified. No remote Render build/deploy or database test succeeded or is claimed.
+- **Files / contracts:** deployment candidate, placeholder page, standalone infrastructure probe, ignored tooling path, non-secret handoff and sign-in evidence. Blueprint, agent prompts, P1 API contract, shared schemas/fixtures, models/API/AI-owned files and backend tests unchanged. `docs/P3_INFRASTRUCTURE_HANDOFF.md` records actual/unverified resource inventory, secure setup, least-privilege policy, Render outbound CIDR procedure, TLS, probe instructions, placeholder boundary and rollback notes.
+- **Resume gate:** owner enables Atlas AI-client access; Render installed/connected or browser signed in; workspace/free-only choice confirmed. Then inspect before creating: dedicated ZEMNE project/eligible free cluster; cluster-scoped app user with only `readWrite` on `zemne`; actual Render outbound CIDRs allowlisted (no `0.0.0.0/0`); secure environment settings; sanitized hosting-network probe; real Render build/HTTPS placeholder verification. Record actual IDs/regions/URLs before completing P3. No P4/P5/P6 work started. STOP while external authorization remains pending.
 
 ## P4 — Core backend and moderation [CLAUDE]
 - [ ] Implement `memorials`, `guestbook_entries`, `tributes`, `story_drafts` collections and indexes.
