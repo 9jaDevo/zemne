@@ -52,10 +52,11 @@ export function CreateMemorial({
         <button className="text-button back" onClick={onBack}>
           ← Back to the hall
         </button>
-        <span className="eyebrow">01 / Create a demo memorial</span>
+        <span className="eyebrow">01 / Create a memorial</span>
         <h2>Begin with their name.</h2>
         <p className="muted">
-          This is a fictional design preview. Please use invented details only.
+          Use invented details only in this public demonstration. Records are
+          stored persistently.
         </p>
         <form
           onSubmit={(event) => {
@@ -179,14 +180,12 @@ export function CreateMemorial({
           <Honeypot />
           <ErrorNotice message={action.error} fields={action.fields} />
           <button className="button primary full" disabled={action.busy}>
-            {action.busy
-              ? "Creating your demo space…"
-              : "Create a demo memorial"}
+            {action.busy ? "Creating your space…" : "Create a memorial"}
             <Icon name="arrow" />
           </button>
           <p className="fine-print">
             You’ll receive a private organizer link. Save it carefully: lost
-            links cannot be recovered. Demo data resets when the page reloads.
+            links cannot be recovered. This private link is shown only once.
           </p>
         </form>
       </section>
@@ -197,14 +196,20 @@ export function CreateMemorial({
 export function ClaimLink({
   created,
   onContinue,
+  isDemo = true,
 }: {
   created: CreateMemorialResponse;
   onContinue: () => void;
+  isDemo?: boolean;
 }) {
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
-  const guest = `/demo?slug=${created.memorial.slug}`;
-  const privatePath = `/demo?manage=${created.memorial_id}#key=${created.organizer_token}`;
+  const guest = isDemo
+    ? `/demo?slug=${created.memorial.slug}`
+    : created.guest_path;
+  const privatePath = isDemo
+    ? `/demo?manage=${created.memorial_id}#key=${created.organizer_token}`
+    : created.manage_path;
   async function copy(path: string, label: string) {
     try {
       await navigator.clipboard.writeText(window.location.origin + path);
@@ -220,7 +225,7 @@ export function ClaimLink({
       <span className="success-circle">
         <Icon name="check" size={30} />
       </span>
-      <span className="eyebrow">02 / Your demo space is ready</span>
+      <span className="eyebrow">02 / Your space is ready</span>
       <h1>
         A place for
         <br />
@@ -237,10 +242,10 @@ export function ClaimLink({
         <code>{privatePath}</code>
         <button
           className="button primary"
-          onClick={() => void copy(privatePath, "Private demo link")}
+          onClick={() => void copy(privatePath, "Private organizer link")}
         >
           <Icon name="copy" />
-          Copy private demo link
+          Copy private organizer link
         </button>
       </div>
       <div className="link-card">
@@ -256,12 +261,13 @@ export function ClaimLink({
           onClick={() => void copy(guest, "Invitation")}
         >
           <Icon name="copy" />
-          Copy demo invitation
+          Copy invitation
         </button>
       </div>
       <p className="notice">
-        DEMO ONLY: these links are not secure access credentials. New memorials
-        exist only in this tab until reload.
+        {isDemo
+          ? "DEMO ONLY: links work only in this tab until reload."
+          : "The private link grants organizer access. Save it securely; it will not be shown again. Never share it with guests."}
       </p>
       <p role="status" className="status-message">
         {message}
@@ -281,7 +287,7 @@ export function ClaimLink({
         disabled={!saved}
         onClick={onContinue}
       >
-        Open organizer preview
+        Open organizer console
         <Icon name="arrow" />
       </button>
     </main>

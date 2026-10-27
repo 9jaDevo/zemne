@@ -79,7 +79,7 @@ export function GuestPanel({
         </h2>
         <p role="status">{receipt}</p>
         <p className="fine-print">
-          Demo only · stored in this tab, not sent to a family. Your
+          {api.isDemo ? "Demo only · stored in this tab. " : ""}Your
           contribution is pending and remains hidden from visitors.
         </p>
         <button
@@ -274,8 +274,10 @@ export function GuestPanel({
             Back to shared {isBook ? "messages" : "memories"}
           </button>
           <p className="fine-print">
-            Every contribution is reviewed before it appears. This demo stores
-            fictional content only in memory.
+            Every contribution is reviewed before it appears. Use invented
+            details only in this demonstration. Approved tributes may be sent to
+            Google AI Studio for Gemma processing; its unpaid tier may use
+            content to improve products.
           </p>
         </form>
       )}
@@ -283,7 +285,13 @@ export function GuestPanel({
   );
 }
 
-export function MemoryWall({ data }: { data: PublicMemorialResponse }) {
+export function MemoryWall({
+  data,
+  isDemo = true,
+}: {
+  data: PublicMemorialResponse;
+  isDemo?: boolean;
+}) {
   const [source, setSource] = useState<string | null>(null);
   const tribute = data.tributes.find((item) => item.id === source);
   return (
@@ -298,7 +306,7 @@ export function MemoryWall({ data }: { data: PublicMemorialResponse }) {
         <>
           <div className="story-meta">
             <span className="status-dot" />
-            Shared by the organizer · DEMO
+            Shared by the organizer {isDemo ? "· DEMO" : ""}
           </div>
           <h3>{data.story.title.replace("[DEMO] ", "")}</h3>
           {data.story.paragraphs.map((paragraph, i) => (
@@ -326,9 +334,11 @@ export function MemoryWall({ data }: { data: PublicMemorialResponse }) {
               {data.story.ai.provider_label}. Model label:{" "}
               {data.story.ai.model_id}.{" "}
               {data.story.edited_by_organizer
-                ? "Edited and published by the demo organizer."
-                : "Published by the demo organizer."}{" "}
-              No AI has been called in this preview.
+                ? "Edited and published by the organizer."
+                : "Published by the organizer."}{" "}
+              {isDemo
+                ? "No AI has been called in this preview."
+                : "AI-assisted text is reviewed by the organizer, not independently verified."}
             </p>
           </div>
         </>
@@ -347,9 +357,7 @@ export function MemoryWall({ data }: { data: PublicMemorialResponse }) {
           title={tribute.contributor_name}
           onClose={() => setSource(null)}
         >
-          <p className="muted">
-            {tribute.relationship} · Approved fictional tribute
-          </p>
+          <p className="muted">{tribute.relationship} · Approved tribute</p>
           <blockquote>{tribute.content}</blockquote>
         </SourceDialog>
       )}

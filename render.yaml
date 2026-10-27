@@ -7,11 +7,11 @@ services:
     plan: free
     region: virginia
     repo: https://github.com/9jaDevo/zemne
-    branch: codex/p3-infrastructure
+    branch: codex/p6-live-integration
     autoDeployTrigger: off
-    buildCommand: npm ci --include=dev && npm install --prefix .infra-tools --no-save --no-package-lock mongodb@7.7.0 && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: node scripts/infra/render-start.mjs
-    healthCheckPath: /provisioning
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 24.11.1

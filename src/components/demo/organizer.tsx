@@ -24,6 +24,7 @@ function StoryEditor({
 }) {
   const action = useAction();
   const [dirty, setDirty] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
   const [saved, setSaved] = useState("");
   const [source, setSource] = useState<string | null>(null);
   const approved = data.tributes.filter((t) => t.status === "approved");
@@ -36,7 +37,7 @@ function StoryEditor({
       </div>
       <h3>Give the words your care.</h3>
       <p className="muted">
-        Review every paragraph against its sources. The fixture text is a draft,
+        Review every paragraph against its sources. AI-assisted text is a draft,
         never a verified account.
       </p>
       <form
@@ -58,7 +59,7 @@ function StoryEditor({
               })),
             });
             setDirty(false);
-            setSaved("Your changes were saved in this demo.");
+            setSaved("Your changes were saved.");
             await onUpdated();
           });
         }}
@@ -130,6 +131,16 @@ function StoryEditor({
         <p role="status" className="status-message">
           {saved}
         </p>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={reviewed}
+            onChange={(e) => setReviewed(e.target.checked)}
+          />
+          <span>
+            I reviewed this draft and its source tributes before publication.
+          </span>
+        </label>
         <div className="button-row">
           <button className="button secondary" disabled={action.busy || !dirty}>
             {action.busy ? "Saving…" : "Save changes"}
@@ -137,7 +148,11 @@ function StoryEditor({
           <button
             className="button primary"
             type="button"
-            disabled={action.busy || dirty}
+            disabled={
+              action.busy ||
+              dirty ||
+              (story.status !== "published" && !reviewed)
+            }
             onClick={() =>
               void action.run(async () => {
                 await api.updateStory(story.id, {
@@ -158,7 +173,7 @@ function StoryEditor({
         {dirty && (
           <p className="fine-print">
             Save your edits before publishing. Changes to a published
-            remembrance are live immediately in the demo.
+            remembrance are live immediately.
           </p>
         )}
       </form>
@@ -167,7 +182,10 @@ function StoryEditor({
         <p>
           {story.ai.provider_label}
           <br />
-          {story.ai.model_id} · No AI service called.
+          {story.ai.model_id}
+          {api.isDemo
+            ? " · No AI service called."
+            : " · Review against the original contributions."}
         </p>
       </div>
       {tribute && (
@@ -175,9 +193,7 @@ function StoryEditor({
           title={tribute.contributor_name}
           onClose={() => setSource(null)}
         >
-          <p className="muted">
-            {tribute.relationship} · Approved fictional tribute
-          </p>
+          <p className="muted">{tribute.relationship} · Approved tribute</p>
           <blockquote>{tribute.content}</blockquote>
         </SourceDialog>
       )}
@@ -199,6 +215,8 @@ export function Organizer({
   const [tab, setTab] = useState<ContributionStatus>("pending");
   const [selected, setSelected] = useState("");
   const [message, setMessage] = useState("");
+  const [weaving, setWeaving] = useState(false);
+  const [weaveError, setWeaveError] = useState("");
   const action = useAction();
   const refresh = useCallback(async () => {
     setData(await api.getOrganizerMemorial(memorialId));
@@ -213,13 +231,46 @@ export function Organizer({
       .catch(() => {
         if (active)
           setLoadError(
-            "This organizer preview is unavailable. Return to the hall and reopen the demo organizer, or use the private demo link. Demo sessions reset on reload.",
+            "Your organizer session is unavailable. Reopen the saved private organizer link. Check your connection and try again.",
           );
       });
     return () => {
       active = false;
     };
   }, [api, memorialId]);
+  useEffect(() => {
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+    let previous = "";
+    async function check() {
+      try {
+        const { job } = await api.getWeaveStatus(memorialId);
+        if (!active) return;
+        setWeaving(job?.status === "running");
+        if (job?.status === "failed")
+          setWeaveError(
+            job.error?.message ??
+              "Gemma could not prepare a draft. Please retry.",
+          );
+        if (job?.status === "succeeded" && previous !== job.id) {
+          await refresh();
+          previous = job.id;
+        }
+        if (job?.status === "running")
+          timer = setTimeout(() => void check(), 4000);
+      } catch {
+        if (active)
+          setWeaveError(
+            "We could not check the weave status. Reload to reconnect before retrying.",
+          );
+      }
+    }
+    void check();
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [api, memorialId, refresh]);
   if (loadError)
     return (
       <main className="content-width page-message">
@@ -233,7 +284,7 @@ export function Organizer({
   if (!data)
     return (
       <main className="content-width page-message" role="status">
-        Opening the organizer preview…
+        Opening the organizer console…
       </main>
     );
   const pending =
@@ -259,7 +310,9 @@ export function Organizer({
     <main className="organizer content-width">
       <div className="organizer-intro">
         <div>
-          <span className="eyebrow">The organizer’s space / DEMO</span>
+          <span className="eyebrow">
+            The organizer’s space {api.isDemo ? "/ DEMO" : ""}
+          </span>
           <h1>
             A little care.
             <br />
@@ -409,26 +462,48 @@ export function Organizer({
               own. You always have the final word.
             </p>
             <div className="notice">
-              <strong>Simulated preview · no Gemma call</strong>
+              <strong>
+                {api.isDemo
+                  ? "Simulated preview · no Gemma call"
+                  : "Gemma · organizer review required"}
+              </strong>
               <p>
-                This preview uses clearly labeled, hand-written example text.
-                No AI service has been called.
+                {api.isDemo
+                  ? "Hand-written example text."
+                  : "Only approved tributes are sent to Google AI Studio. On its unpaid tier, prompts and outputs may be used to improve products. Use invented details only."}
               </p>
             </div>
+            <ErrorNotice message={weaveError} />
+            {weaving && (
+              <p role="status">
+                Weaving approved tributes with Gemma. This can take 1–3 minutes.
+                You can return to this console to check progress.
+              </p>
+            )}
             <button
               className="button primary full"
-              disabled={action.busy || approved === 0}
+              disabled={action.busy || weaving || approved === 0}
               onClick={() =>
                 void action.run(async () => {
-                  const result = await api.weaveStory(memorialId);
-                  setSelected(result.story.id);
-                  await refresh();
+                  setWeaveError("");
+                  setWeaving(true);
+                  try {
+                    const result = await api.weaveStory(memorialId);
+                    setSelected(result.story.id);
+                    await refresh();
+                  } finally {
+                    setWeaving(false);
+                  }
                 })
               }
             >
-              {action.busy
-                ? "Preparing the demo draft…"
-                : "Preview a demo weave"}
+              {weaving
+                ? "Weaving approved memories…"
+                : api.isDemo
+                  ? "Preview a demo weave"
+                  : action.error || weaveError
+                    ? "Retry Gemma weave"
+                    : "Weave approved tributes"}
               <Icon name="arrow" />
             </button>
             <p className="fine-print">
@@ -463,7 +538,7 @@ export function Organizer({
             />
           ) : (
             <div className="empty-state">
-              Your first draft will appear here after a demo weave.
+              Your first draft will appear here after a successful weave.
             </div>
           )}
         </section>

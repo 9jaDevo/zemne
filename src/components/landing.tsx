@@ -22,8 +22,8 @@ export function Landing() {
           <a className="text-button about-link" href="#how-it-works">
             A place for remembering
           </a>
-          <a className="button secondary small" href="/demo?view=create">
-            Create a demo memorial
+          <a className="button secondary small" href="/create">
+            Create a memorial
             <Icon name="arrow" size={16} />
           </a>
         </nav>
@@ -45,12 +45,12 @@ export function Landing() {
               <br className="desktop-break" /> And to keep a life present,
               wherever you are.
             </p>
-            <a className="button primary" href="/demo">
-              Enter the memorial
+            <a className="button primary" href="/create">
+              Create a memorial
               <Icon name="arrow" />
             </a>
             <p className="hero-disclaimer">
-              Explore a fictional memorial · local design preview
+              Synthetic demonstration · real storage and Gemma
             </p>
             <div className="hero-note">
               <span className="note-line" />
@@ -70,28 +70,26 @@ export function Landing() {
               <HallScene
                 reducedMotion={reducedMotion}
                 view="overview"
-                onSelect={(destination) =>
-                  router.push(`/demo?destination=${destination}`)
-                }
+                onSelect={() => router.push("/create")}
               />
             </div>
             <div className="hero-memorial">
               <div>
-                <span className="eyebrow">In loving remembrance</span>
+                <span className="eyebrow">Your memorial begins here</span>
                 <h2>
-                  Elowen Marsh<span>1941 — 2025</span>
+                  A place for their story<span>Made together</span>
                 </h2>
               </div>
               <a
                 className="round-button"
-                href="/demo"
-                aria-label="Enter Elowen’s fictional memorial"
+                href="/create"
+                aria-label="Create a memorial"
               >
                 <Icon name="arrow" />
               </a>
             </div>
             <span className="hero-scene-footnote">
-              FICTIONAL MEMORIAL · ORIGINAL ARCHITECTURE
+              ORIGINAL ARCHITECTURE · THREE PLACES TO CONNECT
             </span>
           </div>
         </section>
@@ -144,10 +142,10 @@ export function Landing() {
             <div className="preview-disclosure">
               <span className="status-dot" />
               <p>
-                Design preview. No real memorial records, persistent storage or
-                AI inference.{" "}
-                <a href="/demo">
-                  Explore the local demo
+                Synthetic demonstration with real storage and Gemma. Use
+                invented details only.{" "}
+                <a href="/create">
+                  Begin a memorial
                   <Icon name="arrow" size={14} />
                 </a>
               </p>
