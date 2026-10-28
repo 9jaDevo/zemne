@@ -1,0 +1,18 @@
+{
+  "description": "A thoughtful place to gather, share memories and keep a life present. Share approved tributes in a serene interactive memorial hall.",
+  "icons": [
+    {
+      "href": "/favicon.svg",
+      "rel": "icon"
+    },
+    {
+      "href": "/favicon.ico",
+      "rel": "icon"
+    },
+    {
+      "href": "/brand/icon-180.png",
+      "rel": "apple-touch-icon"
+    }
+  ],
+  "title": "ZEMNE — A place where memories live on"
+}

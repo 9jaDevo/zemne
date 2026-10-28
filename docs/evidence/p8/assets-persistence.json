@@ -1,0 +1,31 @@
+{
+  "old_memorial_status": 200,
+  "old_approved_tributes": 3,
+  "old_published_story": true,
+  "assets": [
+    {
+      "sha256_match": true,
+      "path": "favicon.svg",
+      "bytes": 261,
+      "status": 200
+    },
+    {
+      "sha256_match": true,
+      "path": "favicon.ico",
+      "bytes": 503,
+      "status": 200
+    },
+    {
+      "sha256_match": true,
+      "path": "brand/zemne-logo-primary.svg",
+      "bytes": 567,
+      "status": 200
+    },
+    {
+      "sha256_match": true,
+      "path": "3d/sanctuary-mobile.glb",
+      "bytes": 876964,
+      "status": 200
+    }
+  ]
+}

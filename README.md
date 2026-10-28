@@ -116,3 +116,17 @@ privacy conditions. [P7 backend retest steps](docs/P7_BACKEND_FIXES_HANDOFF.md)
 and [sanctuary retest steps](docs/SANCTUARY_RETEST.md) remain separate from
 historical report claims. Use only fictional content; this is a developer
 demonstration, not a privacy-certified service for real family records.
+
+## Live submission evidence
+
+The reviewed `main` application commit `95992fc` was deployed to Render on October
+28, 2026. The [fictional submission memorial](https://zemne-preview.onrender.com/m/mira-vale-fictional-submission-65cutb)
+completed a real creation → one guestbook message + three tributes → moderation →
+Gemma → source review → edit → publication flow. The successful job took 51.36s;
+this single smoke run is not a reliability benchmark.
+
+[Watch the 2:50 edited walkthrough](docs/evidence/p8/zemne-walkthrough.mp4) and
+[read the checks and limits](docs/evidence/p8/README.md). The video uses actual
+live UI still captures with local synthetic narration; it compresses waiting and
+does not expose the one-time organizer capability. Physical-phone testing and
+independent acceptance of the latest main remain separate gates.
