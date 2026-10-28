@@ -254,15 +254,15 @@
 **Evidence:** QA report ___ | Video/screenshots ___ | Tested commit ___
 
 ## P8 — Submission and evidence [CODEX + CLAUDE]
-- [ ] Demo captures actual 3D hall, guestbook, 3 tributes, approval, Gemma weave, source inspection and publish in 2–3 minutes.
-- [ ] Capture real test metrics (3D load time, AI latency, number of successful tests; honest failures and fixes).
-- [ ] Write README with source-code setup, model identification, env keys (names only), license and demo; note any post-deadline commits.
-- [ ] Prepare English DEV submission following official Week 4 template/tag and links; explain Ghost in the Machine and open innovation.
-- [ ] Select categories only with demonstrable use: Gemma, Render, MongoDB Atlas; optional .tech domain, Sentry tracing, Entire etc. only if implemented.
-- [ ] Verify public repo, Render app, logo assets, video/screenshots and factual claims.
-- [ ] Publish **before October 31, 11:59 PM PDT (Nov 1, 7:59 AM WAT)**.
+- [x] Demo captures actual 3D hall, guestbook, 3 tributes, approval, Gemma weave, source inspection and publish in 2–3 minutes.
+- [x] Capture real test metrics (3D load time, AI latency, number of successful tests; honest failures and fixes).
+- [x] Write README with source-code setup, model identification, env keys (names only), license and demo; note any post-deadline commits.
+- [x] Prepare English DEV submission following official Week 4 template/tag and links; explain Ghost in the Machine and open innovation.
+- [x] Select categories only with demonstrable use: Gemma, Render, MongoDB Atlas; optional .tech domain, Sentry tracing, Entire etc. only if implemented.
+- [x] Verify public repo, Render app, logo assets, video/screenshots and factual claims.
+- [x] Publish **before October 31, 11:59 PM PDT (Nov 1, 7:59 AM WAT)**.
 **Gate:** actual DEV submission publicly accessible; note URL/receipt.
-**Evidence:** DEV URL ___ | Demo URL ___ | Repo URL ___ | Submitted time ___
+**Evidence:** DEV https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699 | Demo https://zemne-preview.onrender.com | Repo https://github.com/9jaDevo/zemne | Submitted 2026-10-28T07:25:43Z (00:25:43 PDT / 08:25:43 WAT).
 
 ### P8 progress — Codex, 2026-10-28 (incomplete)
 
@@ -281,6 +281,13 @@
 - Delivered **2:50.24 MP4** of edited actual live UI still captures, local synthetic narration, compressed waiting explicitly disclosed; not continuous screen recording. Narration/source manifest, subtitles, assembler and real screenshots in `docs/evidence/p8/`. FFmpeg full decode passed. No management capability captured.
 - Fresh lint and typecheck passed. Main historical suite remains 207 passed / nine opt-in live skipped; current Render build passed. Physical-phone/endurance and independent latest-main QA remain open; timing observation interval and browser interruptions are recorded honestly.
 - DEV article still unpublished at this checkpoint; final evidence must be merged and public links verified before publication. No submitted timestamp exists yet.
+
+### P8 published receipt — COMPLETE, 2026-10-28
+
+- Actual published DEV entry: **https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699**, article `4932571`. Anonymous HTTP 200 and browser rendering verified; official Week 4 submission banner, `devchallenge` and `hf26challenge` visible. Publication timestamp from public structured data and time element: **2026-10-28T07:25:43Z**, equivalent to **October 28, 00:25:43 PDT / 08:25:43 WAT**, before the official deadline.
+- Public repo **https://github.com/9jaDevo/zemne**, PUBLIC/MIT. Production **https://zemne-preview.onrender.com**, tested application **95992fc1cff564bfae041a823a10d2f854520415**, Render deployment **dep-dbgpp4gn74is73d428b0**. Evidence merged on main in **32c254e1f0b14eb7e8f758fbf63bab23518a4ddc** (PR #10). Its Linux CI freshly passed lint, typecheck, **207 tests / nine opt-in live skipped**, and production build.
+- Public screenshots/video/evidence URLs verified before publication. DEV imported the screenshots; visible hall/mobile images loaded. Local receipt and public-page capture: `docs/evidence/p8/submission-receipt.json`, `dev-published.png`. The article explicitly discloses the edited still-capture walkthrough, synthetic narration, single tester, historical provider failures and remaining limitations. Requested DEV AI disclosure: `fully_autonomous`.
+- Categories: Gemma, Render and MongoDB Atlas only; one-award maximum acknowledged. No new product features or Claude-owned APIs/models/security logic changed. **STOP for independent QA; submission is published, but physical-device/performance and latest-main independent acceptance are not silently marked complete.**
 
 ---
 

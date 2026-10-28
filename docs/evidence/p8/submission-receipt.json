@@ -1,0 +1,23 @@
+{
+  "article_id": 4932571,
+  "url": "https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699",
+  "published_at": "2026-10-28T07:25:43Z",
+  "time_source": "Anonymous public HTML datePublished and time datetime",
+  "public_http_status": 200,
+  "in_authenticated_published_listing": true,
+  "week4_submission_banner_visible": true,
+  "tags": [
+    "devchallenge",
+    "hf26challenge"
+  ],
+  "repository": "https://github.com/9jaDevo/zemne",
+  "repository_visibility": "PUBLIC",
+  "license": "MIT",
+  "production_url": "https://zemne-preview.onrender.com",
+  "tested_application_commit": "95992fc1cff564bfae041a823a10d2f854520415",
+  "evidence_merge_commit": "32c254e1f0b14eb7e8f758fbf63bab23518a4ddc",
+  "render_deployment": "dep-dbgpp4gn74is73d428b0",
+  "ai_disclosure_requested": "fully_autonomous",
+  "walkthrough": "https://raw.githubusercontent.com/9jaDevo/zemne/main/docs/evidence/p8/zemne-walkthrough.mp4",
+  "walkthrough_duration_seconds": 170.24
+}

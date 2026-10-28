@@ -1,5 +1,13 @@
 # P8 live evidence — October 28, 2026
 
+**Published submission:** https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699.
+Verified anonymous HTTP 200, rendered Week 4 submission banner, required tags,
+and `datePublished` / `time datetime`: **2026-10-28T07:25:43Z**. Receipt:
+`submission-receipt.json`; actual public screenshot: `dev-published.png`.
+PR #10 verification reran lint, typecheck, build and **207 tests passed / nine
+opt-in live skipped** on Linux, then merged as `32c254e`. Thus the same test count
+has fresh remote verification as well as historical consolidation evidence.
+
 Tested application commit: **95992fc1cff564bfae041a823a10d2f854520415**.
 Public repository: https://github.com/9jaDevo/zemne (PUBLIC, MIT).
 Live service: https://zemne-preview.onrender.com.
