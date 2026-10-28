@@ -1,0 +1,10 @@
+{
+  "elapsed_ms": 742,
+  "readiness": {
+    "canvas": true,
+    "loading": false
+  },
+  "method": "Warm-cache CUA reload followed by read-only DOM observation. Includes automation scheduling; not a cold-load/FPS/physical-device benchmark.",
+  "prior_attempt": "Progress wait tool timed out despite zero matching progress elements; excluded from timing.",
+  "ready_observed_at_ms": 9151
+}

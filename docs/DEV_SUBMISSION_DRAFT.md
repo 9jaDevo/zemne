@@ -4,8 +4,6 @@ published: false
 tags: devchallenge, hf26challenge
 ---
 
-<!-- P8_READY: false. Do not publish until the current deployment, walkthrough and final evidence links are verified. -->
-
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 4: Ghost in the Machine](https://dev.to/challenges/hacktoberfest-week4-2026-10-26).*
 
 ## What I Built
@@ -23,8 +21,13 @@ There are three real destinations inside the WebGL room: a guestbook at the entr
 ## Demo
 
 - **Live app:** [zemne-preview.onrender.com](https://zemne-preview.onrender.com)
-- **Existing synthetic rehearsal:** [Mira Vale](https://zemne-preview.onrender.com/m/mira-vale-synthetic-p6-rehearsal-kkr2i9)
-- **Walkthrough and fresh P8 evidence:** pending verification; this draft is not yet an entry.
+- **Submission memorial:** [Mira Vale — fictional demonstration](https://zemne-preview.onrender.com/m/mira-vale-fictional-submission-65cutb)
+- **2 minute 50 second walkthrough:** [Watch/download the MP4](https://github.com/9jaDevo/zemne/raw/refs/heads/main/docs/evidence/p8/zemne-walkthrough.mp4). Actual live UI captures, edited into a narrated sequence; not a continuous screen recording. Waiting and navigation are compressed. Narration is locally synthesized, and a single AI-assisted tester supplies all fictional guest voices.
+- **Evidence and exact limits:** [P8 live verification](https://github.com/9jaDevo/zemne/blob/main/docs/evidence/p8/README.md), including source-linked publication, permission responses and the original Gemma job record.
+
+![The real WebGL sanctuary on the live Render application](https://raw.githubusercontent.com/9jaDevo/zemne/main/docs/evidence/p8/hall-live-desktop-full.png)
+
+![The actual mobile hall at 390 pixels](https://raw.githubusercontent.com/9jaDevo/zemne/main/docs/evidence/p8/hall-live-mobile390.png)
 
 Judges can explore the public hall without an account. To test the organizer workflow, create a memorial using invented details, save the one-time private link securely, and use the public invitation in a separate guest session. Guests need no registration. Public invitation links are unlisted rather than authenticated private spaces: anyone holding a link can see approved content.
 
@@ -74,6 +77,16 @@ The hardest problem was making failure visible without pretending it had disappe
 The audit logs also mattered more than a green headline. A historical live weave exceeded its waiting window; another permission check stopped at a create-rate limit. Both outcomes remain recorded. Backend changes widened the bounded job/client budget and added overload backoff. The frontend shows elapsed time and reassurance without inventing stages or completion percentages.
 
 The consolidated standard test suite passed **207 tests**, with **nine opt-in live tests skipped**, alongside lint, typecheck and a production build. A skipped provider test is not a current inference success. Contract, permission and database integration tests run against actual local MongoDB; current hosted UI and provider checks must be recorded separately.
+
+On October 28 I tested deployed commit **`95992fc`** on Render. Creating the fictional submission memorial, entering one guestbook message and three separate tributes, approving them, weaving, editing and publishing all completed through the real interface. The job record identifies `gemma-4-31b-it` and reports **51.36 seconds** from start to completion. One successful smoke run is not a new reliability benchmark.
+
+I checked each original tribute before publishing. The model had added quotation marks around a paraphrase; I removed that implied direct quotation, saved the draft as version two, and published version three. The public source button opened Jun's exact approved text. The API contained three approved tributes and a published story with all source IDs resolving. Before approval it returned zero guestbook messages and zero tributes. Organizer access returned **200** for the owning session, **403** for another memorial and **401** anonymously. Public responses used `no-store` headers; a scan of ten initial browser scripts found no credential patterns. That bounded scan is not a complete security audit.
+
+The live hall and fallback had no horizontal overflow at the checked 390px and 375px widths. A warm-cache automation observation saw the canvas ready within a **0.742–9.151 second observation interval**; tool scheduling is included, so this is not a precise cold-load benchmark. A timing-tool wait itself failed and is retained in the evidence. Physical-phone GPU/thermal and endurance testing remain open. Fresh lint and typecheck passed; Render built the reviewed revision and its backend startup probe confirmed database access. The earlier synthetic P6 memorial also survived the redeployment.
+
+![A public source link opens the genuinely approved original contribution](https://raw.githubusercontent.com/9jaDevo/zemne/main/docs/evidence/p8/public-source-approved.png)
+
+![Original logo and actual-size favicon preview on light and dark](https://raw.githubusercontent.com/9jaDevo/zemne/main/docs/evidence/p8/favicon-live-detail.png)
 
 Source validation also has limits. A plausible paragraph can cite a valid tribute while still making an unsupported inference. The checks flag suspicious details and enforce allowed sources, but human review is essential. This is a synthetic developer demonstration, not a security-certified or privacy-certified service for real grieving families.
 

@@ -1,0 +1,24 @@
+{
+  "tested_commit": "95992fc1cff564bfae041a823a10d2f854520415",
+  "cross_status": 403,
+  "secondary_create_status": 201,
+  "cross_body": {
+    "error": {
+      "code": "FORBIDDEN",
+      "message": "Your organizer session is for a different memorial. Open this memorial's private link.",
+      "request_id": "req_X5jszGw1Vm6b",
+      "retryable": false
+    }
+  },
+  "anonymous_body": {
+    "error": {
+      "code": "UNAUTHENTICATED",
+      "message": "Your organizer session has expired. Open your private organizer link again.",
+      "request_id": "req_lx7ZPggODqV3",
+      "retryable": false
+    }
+  },
+  "anonymous_status": 401,
+  "own_status": 200,
+  "at": "2026-10-28T07:07:47.7260272Z"
+}

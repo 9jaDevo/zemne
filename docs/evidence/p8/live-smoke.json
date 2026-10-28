@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-28T07:11:27.0003705Z",
+  "tested_commit": "95992fc1cff564bfae041a823a10d2f854520415",
+  "public_status": 200,
+  "cache_control": "no-store, max-age=0, private",
+  "approved_tributes": 3,
+  "guestbook": 1,
+  "story_status": "published",
+  "story_model": "gemma-4-31b-it",
+  "edited": true,
+  "published_at": "2026-10-28T07:09:25.273Z",
+  "all_citations_resolve": true,
+  "initial_script_count": 10,
+  "initial_script_bytes": 758241,
+  "credential_pattern_matches": 0,
+  "scan_limit": "Initial server-rendered script URLs only; not a full secret audit"
+}

@@ -1,0 +1,63 @@
+1
+00:00:00,000 --> 00:00:11,152
+ZEMNE brings remembrance across distance. This edited walkthrough uses actual browser captures from the live Render app. Every person and contribution is fictional. Waiting and navigation are compressed.
+
+2
+00:00:11,152 --> 00:00:22,239
+The Garden of Light is real Three.js geometry, with a guestbook, tribute lectern and memory wall. Camera destinations open working forms and approved content. This is not a background image.
+
+3
+00:00:22,239 --> 00:00:33,956
+I create Mira Vale with invented details and a neutral original illustration. The one-time organizer capability is saved privately, outside this recording. The invitation is safe to share; the management link is not.
+
+4
+00:00:33,956 --> 00:00:42,161
+A guest leaves a message with publication consent. The server stores it as pending. The receipt says it remains hidden until the organizer approves it.
+
+5
+00:00:42,161 --> 00:00:51,882
+Ari remembers spare seeds, a sunny patch and patient teaching. This is a separate real form submission, stored in MongoDB Atlas, rather than preloaded fixture content.
+
+6
+00:00:51,882 --> 00:01:01,202
+Rowan remembers tea in the garden shed and repairing a watering can. This contribution was submitted from a separate Chrome profile. One tester supplies every fictional voice.
+
+7
+00:01:01,202 --> 00:01:11,251
+Jun remembers extra chairs and a welcoming seed-sharing morning. After Chrome stalled, I checked the queue before retrying this entry in the stable browser. No duplicate tribute was stored.
+
+8
+00:01:11,251 --> 00:01:22,055
+The organizer sees one guestbook message and three pending tributes. An anonymous public API check returned zero of each. I then approve all four individually. Approval is never automatic.
+
+9
+00:01:22,055 --> 00:01:33,396
+Only the three approved tributes reach Gemma four thirty-one B through Google AI Studio. This real job completed in fifty-one point three six seconds. Its wait is shortened here, not presented as instant generation.
+
+10
+00:01:33,396 --> 00:01:44,801
+Gemma returns two paragraphs with approved source identifiers. The story is still private. Valid citation identifiers provide traceability, but do not establish that every claim or quotation is accurate.
+
+11
+00:01:44,801 --> 00:01:55,231
+The source button opens Jun's exact approved tribute. I inspect all three originals. The model's quotation marks suggest direct speech, so I remove them and make the title explicitly fictional.
+
+12
+00:01:55,231 --> 00:02:05,589
+I save the correction as version two, acknowledge source review, and publish version three. This is a real editorial change and publication action. New drafts never publish themselves.
+
+13
+00:02:05,589 --> 00:02:15,207
+The public wall now shows the edited remembrance and the real model label. The anonymous API confirms three approved tributes, an edited published story, and no-store caching headers.
+
+14
+00:02:15,207 --> 00:02:25,776
+A public source click opens the original approved text, not an invented reference. Permission checks also return unauthorized for anonymous organizers, and forbidden for a different organizer's memorial.
+
+15
+00:02:25,776 --> 00:02:38,155
+The live hall fits a three-hundred-and-ninety-pixel viewport. A three-hundred-and-seventy-five-pixel fallback removes the WebGL canvas while keeping destinations available. These are browser checks, not physical-phone performance measurements.
+
+16
+00:02:38,155 --> 00:02:50,070
+The original identity, MIT source and evidence are public. Hosted inference can fail, and free Render can sleep. ZEMNE makes the human review step visible, because participation deserves care as well as connection.

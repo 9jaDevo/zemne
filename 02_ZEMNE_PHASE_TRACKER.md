@@ -273,6 +273,15 @@
 - Deployment blocker: Render still serves the historical P6 deployment (`85a4f6af3fc6431b647eb28b4e083ad4def4d107`); new sanctuary GLB returned HTTP 404. The owner reports the Render plugin connected, but this session exposes no Render actions. Reopened Chrome Person 1 is discoverable; attaching to the ZEMNE settings page still times out before input. No branch save or deployment was performed.
 - Required next action: set Render `zemne-preview` branch to `main`, keep existing Free plan/environment values, and deploy latest commit through an accessible authorized integration or owner dashboard. Then verify actual deployed revision, capture the new hall/mobile UI, run the three-contribution real Gemma flow, assemble the truthful 2–3 minute walkthrough and publish/verify the DEV article. All these acceptance gates remain open.
 
+### P8 deployment/evidence follow-up — 2026-10-28
+
+- Browser control recovered. Owner's successful manual deployment was verified as older commit `360a458`; corrected Render source to `main` and manually deployed **95992fc1cff564bfae041a823a10d2f854520415**. Deployment **dep-dbgpp4gn74is73d428b0**, service `srv-dbg8g40m7kps73bnh6e0`, Virginia/Free, live **06:57:54Z**. Plan and existing environment values unchanged; backend startup MongoDB probe `ok`.
+- Actual live UI: created fictional Mira Vale, saved one-time private link outside repo, submitted one guestbook message and three separate fictional tributes, verified pending public arrays empty, approved each, ran real Gemma, reviewed all sources, corrected implied direct quotation, saved and published. Gemma job **51.360s**, `gemma-4-31b-it` / Google AI Studio; published version three **07:09:25.273Z**. Public source button opened exact approved Jun contribution. Anonymous organizer 401; cross-memorial organizer 403; own 200. Public response no-store. See `docs/evidence/p8/README.md` and JSON records.
+- Live WebGL hall and mobile screenshots captured; 390px hall / 375px manual fallback have no horizontal document overflow. Favicon SVG/ICO, logo and room GLB return 200 with matching SHA-256. Old P6 memorial survives redeployment. Initial ten-script credential-pattern scan found zero matches; bounded scan only. Real metadata references verified.
+- Delivered **2:50.24 MP4** of edited actual live UI still captures, local synthetic narration, compressed waiting explicitly disclosed; not continuous screen recording. Narration/source manifest, subtitles, assembler and real screenshots in `docs/evidence/p8/`. FFmpeg full decode passed. No management capability captured.
+- Fresh lint and typecheck passed. Main historical suite remains 207 passed / nine opt-in live skipped; current Render build passed. Physical-phone/endurance and independent latest-main QA remain open; timing observation interval and browser interruptions are recorded honestly.
+- DEV article still unpublished at this checkpoint; final evidence must be merged and public links verified before publication. No submitted timestamp exists yet.
+
 ---
 
 ## Risk register
