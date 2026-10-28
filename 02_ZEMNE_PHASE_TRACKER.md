@@ -289,6 +289,12 @@
 - Public screenshots/video/evidence URLs verified before publication. DEV imported the screenshots; visible hall/mobile images loaded. Local receipt and public-page capture: `docs/evidence/p8/submission-receipt.json`, `dev-published.png`. The article explicitly discloses the edited still-capture walkthrough, synthetic narration, single tester, historical provider failures and remaining limitations. Requested DEV AI disclosure: `fully_autonomous`.
 - Categories: Gemma, Render and MongoDB Atlas only; one-award maximum acknowledged. No new product features or Claude-owned APIs/models/security logic changed. **STOP for independent QA; submission is published, but physical-device/performance and latest-main independent acceptance are not silently marked complete.**
 
+### P8 owner-authorized custom domain — 2026-10-28
+
+- Owner confirms `pdev.tech` was claimed through Hacktoberfest and approves Render's additional **$0.25/month** domain charge (two included workspace slots already used). Added **zemne.pdev.tech** to the same service, verified existing CNAME to `zemne-preview.onrender.com`, and verified Render **Certificate Issued** plus real HTTPS. DNS records, service plan, secrets and backend logic were not changed; original Render URL remains enabled.
+- New primary demo: **https://zemne.pdev.tech**. Custom-host health 200 with database `ok`; organizer exchange/read 200, Secure/HttpOnly host cookie; wrong-origin write 403 `ORIGIN_REJECTED`; valid guestbook write 202 `pending` and absent publicly. Published real-Gemma story and approved-source navigation work through the custom hostname. No additional inference was called. See `docs/evidence/p8/domain/`.
+- Updated the existing DEV article (same URL/id and original submission time) with branded demo, fallback and **Best Use of a .tech Domain**. Public HTML verified both updates, modified **2026-10-28T18:44:32Z**. The article explicitly says this is a subdomain of Hacktoberfest-claimed `pdev.tech`; rules do not expressly settle subdomain eligibility, so prize acceptance is not guaranteed. Four genuine category claims now supersede the original three-category checkpoint.
+
 ---
 
 ## Risk register
