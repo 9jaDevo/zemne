@@ -37,7 +37,7 @@ No environment value or plan was changed. Startup MongoDB probe reported `ok`.
   three approved tributes, one guestbook message, all citations resolve, model label
   present, edited story, `no-store, max-age=0, private` cache policy.
 - `permission-check.json`: actual owner 200, cross-memorial organizer 403/FORBIDDEN,
-  anonymous organizer 401/UNAUTHORIZED. A second fictional memorial was created for
+  anonymous organizer 401/UNAUTHENTICATED. A second fictional memorial was created for
   the cross-scope test. An initial manual probe used the wrong session request field
   and returned 400 before being corrected to the documented `memorial_id`/`token`.
 - Ten initial page script URLs (758,241 bytes) were checked for complete organizer
