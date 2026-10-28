@@ -40,6 +40,15 @@ does not share data across browser sessions. Use fictional content only.
 Create an ignored `.env.local` with required `NAME=value`
 assignments using secure local tooling. Never expose these variables with `NEXT_PUBLIC_`.
 
+Backend setup requires a MongoDB database (`zemne` by default) and a privately
+generated session secret of at least 32 characters. Atlas connections must use
+validated TLS and an approved network allowlist. A local MongoDB used for the
+real application needs a replica set because publication/moderation use
+transactions. Required server configuration names are listed below; no values
+belong in source control. Configure a reachable Gemma chat-completions provider
+before expecting generation to succeed. Missing/unavailable AI shows an explicit
+error rather than a generated-looking substitute.
+
 ## Ownership and next handoff
 
 | Paths | Owner / purpose |
@@ -61,9 +70,9 @@ code. The development `/demo` adapter remains disabled in production.
 
 ## License and attribution
 
-License selection awaits explicit owner approval. No LICENSE grant is made in P0;
-package metadata is `UNLICENSED`. Public source visibility does not grant reuse rights.
-Select an appropriate open-source license before claiming the project itself is open source.
+The owner approved the [MIT license](LICENSE) for ZEMNE's application source.
+Third-party dependencies, fonts, textures and model weights retain their own
+licenses; this grant does not relicense those assets or override hosted-provider terms.
 
 Dependencies: Next.js (MIT), React (MIT), Tailwind CSS (MIT), Three.js (MIT),
 React Three Fiber (MIT), TypeScript (Apache-2.0), ESLint (MIT) and Vitest (MIT).
@@ -80,3 +89,30 @@ and Claude's P7 backend fixes. See `docs/MAIN_INTEGRATION_HANDOFF.md` for ancest
 validation and remaining gates. Historical screenshots and hosted P6 evidence do
 not certify the new main revision. Deployment, independent live/device retesting,
 license selection and submission are separate steps.
+
+## AI, tests and honest limits
+
+The configured model is **`gemma-4-31b-it`**, served by **Google AI Studio through
+the Gemini API OpenAI-compatible interface**. Gemma 4's
+[official model card](https://huggingface.co/google/gemma-4-31B-it) identifies the
+weights under Apache-2.0. ZEMNE does not self-host or fine-tune the weights. Only
+approved tribute text and memorial metadata go to the model, under per-request
+source aliases. Structured contributor-name fields are omitted, but personal
+details inside prose are not automatically anonymized. Valid source links enable
+human review; they do not prove factual accuracy. Nothing is auto-published.
+
+The consolidated standard suite passed **207 tests**, with **nine opt-in live
+tests skipped**, plus lint, typecheck and production build. Those results and
+green CI certify the tested source, not current hosted inference availability.
+The latest saved real-model evaluation succeeded in **4 of 6** synthetic scenarios;
+two failed safely after overload retries. Successful end-to-end waiting times
+were **37.3–216.9 seconds** (four samples), so a short edited walkthrough must
+disclose any omitted waiting time. Free Render can sleep; free AI capacity is
+intermittent; background jobs can be interrupted by process restarts.
+
+See [technical evidence and architecture](docs/P8_TECHNICAL_EVIDENCE.md) for exact
+budgets, permissions, database choices, benchmark files, failures/fixes and provider
+privacy conditions. [P7 backend retest steps](docs/P7_BACKEND_FIXES_HANDOFF.md)
+and [sanctuary retest steps](docs/SANCTUARY_RETEST.md) remain separate from
+historical report claims. Use only fictional content; this is a developer
+demonstration, not a privacy-certified service for real family records.
