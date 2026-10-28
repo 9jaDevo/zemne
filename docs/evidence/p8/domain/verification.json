@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-28T18:42:50.1710054Z",
+  "origin": "https://zemne.pdev.tech",
+  "tls_validation": "System TLS validation enabled; no certificate bypass",
+  "health": {
+    "status": "ok",
+    "checks": {
+      "database": "ok",
+      "ai": "configured"
+    }
+  },
+  "organizer_exchange_status": 200,
+  "organizer_read_status": 200,
+  "host_cookie_present": true,
+  "cookie_secure": true,
+  "cookie_http_only": true,
+  "cookie_path": "/",
+  "cross_origin_write_status": 403,
+  "cross_origin_error": "ORIGIN_REJECTED",
+  "public_status": 200,
+  "public_cache": "no-store, max-age=0, private",
+  "approved_tributes": 3,
+  "published_model": "gemma-4-31b-it",
+  "published_at": "2026-10-28T07:09:25.273Z",
+  "extra_inference_call": false
+}

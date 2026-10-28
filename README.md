@@ -6,7 +6,10 @@ Mobile-first memorial hall with original ZEMNE identity, real React Three Fiber
 architecture, equivalent 2D navigation, moderated contributions, MongoDB Atlas
 persistence and a real Gemma Memory Weaver.
 
-Hosted synthetic demonstration: https://zemne-preview.onrender.com
+Hosted synthetic demonstration: https://zemne.pdev.tech
+
+Render fallback: https://zemne-preview.onrender.com. `zemne.pdev.tech` is a
+subdomain of the owner's Hacktoberfest-claimed `pdev.tech`; Render provides HTTPS.
 Create at `/create`, visit invitations at `/m/<slug>`, and use the private
 `/manage/<id>#key=<secret>` link for organizer access. Use invented details only:
 the configured Google AI Studio unpaid tier may use prompts/outputs to improve
@@ -123,7 +126,7 @@ demonstration, not a privacy-certified service for real family records.
 — published October 28, 2026 at 07:25:43 UTC, verified anonymously.
 
 The reviewed `main` application commit `95992fc` was deployed to Render on October
-28, 2026. The [fictional submission memorial](https://zemne-preview.onrender.com/m/mira-vale-fictional-submission-65cutb)
+28, 2026. The [fictional submission memorial](https://zemne.pdev.tech/m/mira-vale-fictional-submission-65cutb)
 completed a real creation → one guestbook message + three tributes → moderation →
 Gemma → source review → edit → publication flow. The successful job took 51.36s;
 this single smoke run is not a reliability benchmark.

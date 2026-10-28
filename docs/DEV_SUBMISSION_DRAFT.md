@@ -22,8 +22,9 @@ There are three real destinations inside the WebGL room: a guestbook at the entr
 
 ## Demo
 
-- **Live app:** [zemne-preview.onrender.com](https://zemne-preview.onrender.com)
-- **Submission memorial:** [Mira Vale — fictional demonstration](https://zemne-preview.onrender.com/m/mira-vale-fictional-submission-65cutb)
+- **Live app:** [zemne.pdev.tech](https://zemne.pdev.tech)
+- **Render fallback:** [zemne-preview.onrender.com](https://zemne-preview.onrender.com)
+- **Submission memorial:** [Mira Vale — fictional demonstration](https://zemne.pdev.tech/m/mira-vale-fictional-submission-65cutb)
 - **2 minute 50 second walkthrough:** [Watch/download the MP4](https://github.com/9jaDevo/zemne/raw/refs/heads/main/docs/evidence/p8/zemne-walkthrough.mp4). Actual live UI captures, edited into a narrated sequence; not a continuous screen recording. Waiting and navigation are compressed. Narration is locally synthesized, and a single AI-assisted tester supplies all fictional guest voices.
 - **Evidence and exact limits:** [P8 live verification](https://github.com/9jaDevo/zemne/blob/main/docs/evidence/p8/README.md), including source-linked publication, permission responses and the original Gemma job record.
 
@@ -34,6 +35,8 @@ There are three real destinations inside the WebGL room: a guestbook at the entr
 Judges can explore the public hall without an account. To test the organizer workflow, create a memorial using invented details, save the one-time private link securely, and use the public invitation in a separate guest session. Guests need no registration. Public invitation links are unlisted rather than authenticated private spaces: anyone holding a link can see approved content.
 
 The demonstration uses a free Render service and Google’s unpaid hosted inference. Render may need to wake up; Gemma can be slow or unavailable. An explicit error and retry are part of the real behavior. Nothing substitutes a hand-written story when inference fails. Please use fictional details only: the provider’s unpaid terms permit processing for product improvement and human review.
+
+The branded demo uses **zemne.pdev.tech**, a subdomain of **pdev.tech**, which I claimed through the Hacktoberfest promotion. Render verified the existing CNAME and issued HTTPS. The original Render address remains available. This is an explicit subdomain deployment, rather than a claim that a separate `zemne.tech` domain was registered.
 
 ## Code
 
@@ -105,5 +108,7 @@ Technical sources: [Gemma 4 model card](https://huggingface.co/google/gemma-4-31
 - **Best Use of Gemma:** real source-linked remembrance synthesis from organizer-approved tributes, using hosted `gemma-4-31b-it`.
 - **Best Use of Render:** the deployed Next.js interface, Node APIs and in-process inference job runtime.
 - **Best Use of MongoDB Atlas:** persistent memorials, pending/approved contributions, drafts, publication state and abuse-control records behind the open-weight AI app.
+
+- **Best Use of a .tech Domain:** the live demo at [zemne.pdev.tech](https://zemne.pdev.tech), a subdomain of `pdev.tech`, claimed through the Hacktoberfest promotion.
 
 These claims depend on the working deployment and recorded evidence. No other partner category is claimed. I understand that one submission can qualify for several categories but win only one prize.
