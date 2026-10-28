@@ -264,6 +264,15 @@
 **Gate:** actual DEV submission publicly accessible; note URL/receipt.
 **Evidence:** DEV URL ___ | Demo URL ___ | Repo URL ___ | Submitted time ___
 
+### P8 progress — Codex, 2026-10-28 (incomplete)
+
+- MIT license approved by owner and merged with README, exact model/provider, security, benchmark limitations and asset attribution in PR #9. Main commit: `95992fc1cff564bfae041a823a10d2f854520415`; required CI passed. Public repository and MIT metadata verified: https://github.com/9jaDevo/zemne.
+- Official published Week 4 rules/template reviewed; evidence and deadline discrepancy documented in `docs/P8_RULES_CHECK.md`. Technical source review and historical test results are in `docs/P8_TECHNICAL_EVIDENCE.md`; these are not fresh production acceptance.
+- English DEV draft created, article ID `4932571`, with `devchallenge` and `hf26challenge` tags. It is UNPUBLISHED and not a submitted entry. Local copy: `docs/DEV_SUBMISSION_DRAFT.md`. No submitted time exists.
+- Actual public identity/favicon screenshots saved in `docs/evidence/p8/identity-live.png` and `favicon-live-detail.png`; favicon and primary SVG returned HTTP 200. Existing local redesign captures remain explicitly development evidence.
+- Deployment blocker: Render still serves the historical P6 deployment (`85a4f6af3fc6431b647eb28b4e083ad4def4d107`); new sanctuary GLB returned HTTP 404. The owner reports the Render plugin connected, but this session exposes no Render actions. Reopened Chrome Person 1 is discoverable; attaching to the ZEMNE settings page still times out before input. No branch save or deployment was performed.
+- Required next action: set Render `zemne-preview` branch to `main`, keep existing Free plan/environment values, and deploy latest commit through an accessible authorized integration or owner dashboard. Then verify actual deployed revision, capture the new hall/mobile UI, run the three-contribution real Gemma flow, assemble the truthful 2–3 minute walkthrough and publish/verify the DEV article. All these acceptance gates remain open.
+
 ---
 
 ## Risk register
