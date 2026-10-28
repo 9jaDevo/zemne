@@ -119,6 +119,9 @@ demonstration, not a privacy-certified service for real family records.
 
 ## Live submission evidence
 
+[Published Week 4 DEV submission](https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699)
+— published October 28, 2026 at 07:25:43 UTC, verified anonymously.
+
 The reviewed `main` application commit `95992fc` was deployed to Render on October
 28, 2026. The [fictional submission memorial](https://zemne-preview.onrender.com/m/mira-vale-fictional-submission-65cutb)
 completed a real creation → one guestbook message + three tributes → moderation →

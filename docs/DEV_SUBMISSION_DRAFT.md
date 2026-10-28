@@ -1,7 +1,9 @@
 ---
 title: "ZEMNE: Distance shouldn't erase participation in remembrance"
-published: false
+published: true
 tags: devchallenge, hf26challenge
+published_at: 2026-10-28T07:25:43Z
+url: https://dev.to/9jadevo/zemne-distance-shouldnt-erase-participation-in-remembrance-5699
 ---
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 4: Ghost in the Machine](https://dev.to/challenges/hacktoberfest-week4-2026-10-26).*
